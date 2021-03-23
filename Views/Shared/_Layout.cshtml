@@ -1,0 +1,165 @@
+﻿@inject SignInManager<ApplicationUser> signInManager;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="~/css/site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+    <link href="~/css/dataTables.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <link href="~/css/dataTables.bootstrap.css" rel="stylesheet" />
+
+    <link href="~/lib/font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet" />
+    <!------ Include the above in your HEAD tag ---------->
+</head>
+<body>
+    
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark  box-shadow ">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Voucher" asp-action="dashboard">
+                    <img src="~/images/logo2-b-192x43.png" width="120" height="30" />
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse ">
+                    @if (signInManager.IsSignedIn(User))
+                    {
+                        <ul class="navbar-nav ">
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="" asp-controller="voucher" asp-action="dashboard">Dashboard</a>
+                            </li>
+
+                        </ul>
+                    }
+
+                    @if (signInManager.IsSignedIn(User))
+                    {
+                        if ((User.IsInRole("ChiefAccountant") || User.IsInRole("AccountOfficer")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Voucher
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/voucher/create">Create Voucher</a>
+                                    <a class="dropdown-item" href="/voucher/voucherspending">Vouchers on my desk</a>
+                                    <a class="dropdown-item" href="/voucher/viewactivevouchers">Approved Vouchers</a>
+                                    <a class="dropdown-item" href="/voucher/viewinactivevouchers">Processing Vouchers</a>
+                                    <a class="dropdown-item" href="/voucher/viewallvouchers">View All Vouchers</a>
+                                </div>
+                            </div>
+                        }
+                        else if ((User.IsInRole("Approval") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Voucher
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/voucher/voucherspending">Vouchers on my desk</a>
+                                    <a class="dropdown-item" href="/voucher/viewactivevouchers">Approved Vouchers</a>
+                                    <a class="dropdown-item" href="/voucher/viewallvouchers">View All Vouchers</a>
+                                </div>
+                            </div>
+                        }
+
+                    }
+
+                    @if (signInManager.IsSignedIn(User) && (User.IsInRole("ChiefAccountant") || User.IsInRole("Admin")))
+                    {
+                        <div class="dropdown">
+                            <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Admin
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="/administration/listusers">Users</a>
+                                <a class="dropdown-item" href="/administration/listroles">Roles</a>
+                                <a class="dropdown-item" href="/administration/createparticular">Particulars</a>
+                            </div>
+                        </div>
+                    }
+                    <ul class="navbar-nav ml-auto">
+                        @if (signInManager.IsSignedIn(User))
+                        {
+                            if (User.IsInRole("ChiefAccountant") || User.IsInRole("Admin"))
+                            {
+                                <div class="dropdown">
+                                    <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        @User.Identity.Name
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item" asp-controller="account" asp-action="registration">Register</a>
+                                        <a class="dropdown-item" asp-controller="account" asp-action="ChangePassword">Change Password</a>
+                                        <a class="dropdown-item" asp-controller="account" asp-action="Edituser">Edit Account</a>
+                                        <a class="dropdown-item" asp-controller="account" asp-action="logout">Log Out</a>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="dropdown">
+                                    <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        @User.Identity.Name
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                                        <a class="dropdown-item" asp-controller="account" asp-action="ChangePassword">Change Password</a>
+                                        <a class="dropdown-item" asp-controller="account" asp-action="Edituser">Edit Account</a>
+                                        <a class="dropdown-item" asp-controller="account" asp-action="logout">Log Out</a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            @*<li class="nav-item">
+                    <a class="nav-link text-light" asp-controller="account" asp-action="registration">
+                        Register
+                    </a>
+                </li>*@
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="account" asp-action="login">
+                                    Login
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container pb-5">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2021 - BrandOne Technologies Limited. All rights reserved. - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+
+</body>
+</html>
+<style>
+    .navbar {
+        /*background: #383d41 #092f89*/
+        background: #0e2252
+    }
+</style>
+<script>
+
+</script>

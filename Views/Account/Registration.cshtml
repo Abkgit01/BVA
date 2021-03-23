@@ -1,0 +1,133 @@
+﻿@model IEnumerable<ApplicationRole>
+@{
+
+    ViewBag.Title = "Registration Page";
+}
+
+
+<div class="container register">
+    <div class="row">
+        <div class="col-md-3 register-left">
+            <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="" />
+            <h3>Welcome</h3>
+            <p>Register and choose your role!</p>
+            <input type="submit" name="" onclick="window.location='/Account/Login';" value="Login" /><br />
+        </div>
+        <div class="col-md-9 register-right">
+            @*<ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Employee</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Hirer</a>
+                </li>
+            </ul>*@
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <h3 class="register-heading" style="text-align:center; color : #092f89 ;">Register and choose a role</h3>
+                    <form id="registerForm" class="row register-form">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input id="txtFirstName" type="text" class="form-control" placeholder="First Name *" value="" required />
+                            </div>
+                            <div class="form-group">
+                                <input id="txtLastName" type="text" class="form-control" placeholder="Last Name *" value="" required />
+                            </div>
+                            <div class="form-group">
+                                <input id="txtPassword" type="password" minlength="8" class="form-control" placeholder="Password *" value="" required />
+                            </div>
+                            <div class="form-group">
+                                <input id="txtConfirmPassword" type="password" minlength="8" class="form-control" placeholder="Confirm Password *" value="" required />
+                            </div>
+                            <input id="btnsubmit" type="submit" class="btnRegister" value="Register" />
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input id="txtEmail" type="email" class="form-control" placeholder="Your Email *" value="" required />
+                            </div>
+
+                            <div class="form-group">
+                                <select id="txtRoles" required class="form-control">
+                                    <option>Select Roles</option>
+                                    @foreach (var b in Model)
+                                    {
+                                    <option value="@b.Name">@b.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Signature File</label>
+                                <input type="file" id="txtPhoto" class="form-control" placeholder="Signature *" value="" required />
+                            </div>
+
+
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    body {
+        background: #DCDCDC;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+        $("#registerForm").on('submit', function (event) {
+            console.log(event)
+            event.preventDefault();
+            var msg = confirm("Are you sure you want to register this user?");
+            //Serialize the form datas.
+            var fileUpload = $("#txtPhoto").get(0);
+            var files = fileUpload.files;
+            var data = new FormData();
+            data.append("Photo", files[0]);
+            data.append("FirstName", $("#txtFirstName").val());
+            data.append("LastName", $("#txtLastName").val());
+            data.append("Password", $("#txtPassword").val());
+            data.append("Email", $("#txtEmail").val());
+            data.append("Role", $("#txtRoles").val());
+            if (msg === true) {
+
+                var password = $("#txtPassword").val();
+                var confirmPassword = $("#txtConfirmPassword").val();
+                if (password != confirmPassword) {
+                    alert("Passwords do not match.");
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Account/Registration",
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        var res = response.split("|");
+                        debugger;
+                        if ($.trim(res[0]) === "1") {
+                            //SuccessMessage("#registerForm", "Registration created successfully...");
+                            alert(res[1]);
+                            var location = window.location.origin + "/voucher/dashboard";
+                            window.location.href = location;
+                            $("#AppDiv").removeClass("Submitloader");
+                        }
+                        else {
+                            $("#AppDiv").removeClass("Submitloader");
+                            //ErrorMessage("#FormCreateNewApplicationInfo", res[1].trim());
+                            alert(res[1]);
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
+

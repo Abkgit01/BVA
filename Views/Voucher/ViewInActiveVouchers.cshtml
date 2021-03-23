@@ -1,0 +1,78 @@
+﻿@model IEnumerable<Voucher>
+@{
+
+    ViewBag.Title = "InActive Vouchers";
+}
+
+<div class="">
+    <h4 style="text-align:center; color: #092f89;">Processing Vouchers</h4>
+    <div>
+        <br />
+        <table class="display table table-striped table-bordered" id="VouchersTable" style="font-size:small;">
+            <thead>
+                <tr>
+                    <th>Voucher No.</th>
+                    <th>Account Payee</th>
+                    <th>Voucher Type </th>
+                    <th>Amount</th>
+                    <th> Voucher Date </th>
+                    <th> Actions History </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+
+
+                    var VoucherId = s.Id.ToString("D3");
+
+                    <tr>
+                        @if (s.VoucherType == VoucherType.Payment)
+                        {
+                            <td><a href="/Voucher/VoucherAction/@s.Id">PAY@{@VoucherId}</a></td>
+                        }
+                        else
+                        {
+                            <td><a href="/Voucher/VoucherAction/@s.Id">REC@{@VoucherId}</a></td>
+                        }
+                        <td>@s.Payee</td>
+                        <td>@s.VoucherType</td>
+                        <td>&#8358;@String.Format("{0:n0}", @s.TotalAmount)</td>
+                        <td>@s.DateCreated</td>
+
+                        <td><a asp-controller="voucher" asp-action="voucheraction" asp-route-id="@s.Id"><i class="fa fa-eye"> </i> <b>View</b> </a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.print.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#VouchersTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+            ],
+            //"order": [[4, "desc"]]
+            "aaSorting": []
+        });
+    });
+</script>

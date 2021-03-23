@@ -1,0 +1,235 @@
+﻿@model VoucherCashBookViewModel
+@{
+    Layout = null;
+}
+@{
+
+    ViewBag.Title = "View Voucher";
+}
+
+
+
+<div class="container pt-3 pb-3" style="height:auto">
+    <div class="">
+        <h1 style="text-align:center; color : #191616 ;">
+            <img src="C:/Users/User/source/repos/VoucherAutomationSystem/wwwroot/images/logo2-b-192x43.png" />
+        </h1>
+    </div>
+
+    <form id="createVoucherForm">
+        <div class="row">
+            <div class="column" style="font-size:medium">
+
+                <div style="border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    <div class="form-group ">
+                        <label>Account Payee</label> : @Model.Voucher.Payee
+                    </div>
+                    <div class="form-group ">
+                        <label>Address</label> : @Model.Voucher.Address
+                    </div>
+                    <div class="form-group ">
+                        <label>Telephone Number</label> : @Model.Voucher.PhoneNo
+                    </div>
+                    <div class="form-group ">
+                        <label>Name</label> : @Model.Voucher.Name
+                    </div>
+                </div>
+                <br />
+
+                <div style="border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    <div class="form-group">
+                        <label>Bank Account</label> : @Model.Voucher.BankName
+                    </div>
+                    <div class="form-group ">
+                        <label>Bank Account No</label> : @Model.Voucher.AccountNo
+                    </div>
+                </div>
+                <br />
+            </div>
+
+            <div class="column" style="font-size:medium">
+                <div style="position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    @{
+                        var VoucherId = @Model.Voucher.Id.ToString("D3");
+                    }
+                    @if (Model.Voucher.VoucherType == VoucherType.Payment)
+                    {
+                        <div class="form-group ">
+                            <label>Voucher Number</label> : PAY @VoucherId
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group ">
+                            <label>Voucher Number</label> : REC @VoucherId
+                        </div>
+                    }
+
+                    <div class="form-group ">
+                        <label>Date </label> : @Model.Voucher.DateCreated
+                    </div>
+                    <div class="form-group ">
+                        <label>Voucher Type</label> : @Model.Voucher.VoucherType
+                    </div>
+                </div>
+                <br />
+
+                <div style="position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    <div class="form-group ">
+                        <label>Cheque No</label> : @Model.Voucher.ChequeNo
+                    </div>
+                </div>
+                <br />
+
+                <div style="position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    <div class="form-group ">
+                        <label>Currency</label> : @Model.Voucher.Currency
+                    </div>
+                    <div class="form-group ">
+                        <label>Exchange Rate</label> : @Model.Voucher.ExchangeRate
+                    </div>
+                </div>
+                <br />
+            </div>
+
+            <div style="padding-left:10px;padding-right:10px; width:100%; position:relative">
+
+                <br>
+                <b>Description</b>
+                <div style="width:95%; position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:5px; padding-bottom:10px;">
+                    @Model.Voucher.Description
+                </div>
+                <br />
+
+                <table class="table table-hover table-bordered" style="width: 97.5%; font-size:medium; border: 1px solid black;">
+                    @*class="table-responsive"*@
+
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Particulars</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Cashbook Amount</th>
+
+                        </tr>
+                    </thead>
+                    @{ var i = 0; }
+                    <tbody>
+                        @foreach (var t in Model.CashBooks)
+                        {
+                            i++;
+
+                            <tr style="font-size:medium;">
+                                <td style="border: 1px solid black;">@i</td>
+                                <td style="border: 1px solid black;">@t.Particular</td>
+                                <td style="border: 1px solid black;"><small>@t.Description</small></td>
+                                <td style="border: 1px solid black;">&#8358;@String.Format("{0:n0}", @t.Amount)</td>
+                                <td style="border: 1px solid black;">&#8358;@String.Format("{0:n0}", @t.Amount)</td>
+
+                            </tr>
+                        }
+                        @*<tr style="font-size:large;">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>Home Currency Total</td>
+                                <td>@Model.Voucher.TotalAmount</td>
+                            </tr>*@
+                        <tr style="font-size:medium;">
+                            <td style="border: 1px solid black;"></td>
+                            <td style="border: 1px solid black;"></td>
+                            <td style="border: 1px solid black;"></td>
+                            <td style="border: 1px solid black;">Total Amount</td>
+                            <td style="border: 1px solid black;">&#8358;@String.Format("{0:n0}", @Model.Voucher.TotalAmount)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                <b>Total in words</b>
+                <div style="width:95%; position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:5px; padding-bottom:10px;">
+                    @Model.NumberInWords Naira.
+                </div>
+                <div style="padding-top:30px">
+                    @*@{
+
+            foreach (var k in Model.Actions)
+            {
+                <div style="width: 97.5%;" valign="top">
+                    <div style="border-bottom: dotted 2px #000;padding: 10px 0 0; font-size:20px;">
+                        @if (@k.ActionPerformed == ActionPerformed.Edited)
+                        {
+                            <p style="display: inline-block; margin-bottom: -3px; background-color: #FFF; padding: 3px 10px 3px 0; color: #000;font-size:10px">Created</p>
+                        }
+                        else
+                        {
+                            <p style="display: inline-block; margin-bottom: -3px; background-color: #FFF; padding: 3px 10px 3px 0; color: #000;font-size:10px">@k.ActionPerformed</p>
+                        }
+                        &nbsp;<span style="font-family: Calibri;padding-left:30px;">@k.User.FirstName <span style="font-family: Calibri;padding-left:30px;"> @k.User.LastName &nbsp;<span style="font-family: Calibri;padding-left:100px;">  <img src="C:/Users/User/source/repos/VoucherAutomationSystem/wwwroot/images/@k.User.SignatureImage" style="height: 35px; width:35px" />  &nbsp;<span style="font-family: Calibri;padding-left:100px;">  @k.DateUpdated.ToShortDateString() </span>
+                    </div>
+                </div>
+            }
+        }*@
+                    <table class="pb-0" style="border-collapse: collapse; font-size: medium; width: 97.5%">
+                        <tbody>
+                            @foreach (var k in Model.Actions)
+                            {
+                                <tr class="border-bottom" style=" ">
+                                    @if (@k.ActionPerformed == ActionPerformed.Edited)
+                                    {
+                                        <td style="font-size:10px; margin: 0; padding: 0;">Created</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="font-size:10px; margin: 0; padding: 0;">@k.ActionPerformed</td>
+                                    }
+                                    <td style="margin-bottom: 0; padding-bottom: 0;">@k.User.FirstName</td>
+                                    <td style="margin-bottom: 0; padding-bottom: 0;">@k.User.LastName</td>
+                                    <td style="margin-bottom: 0; padding-bottom: 0;"><img src="C:/Users/User/source/repos/VoucherAutomationSystem/wwwroot/images/@k.User.SignatureImage" style="height: 35px; width:35px" /></td>
+                                    <td style="margin-bottom: 0; padding-bottom: 0;">@k.DateUpdated</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                        </table>
+                </div>
+            </div>
+        </div>
+    </form>
+    <br />
+
+    @foreach (var file in Model.VoucherFiles)
+    {
+        <br />
+        <embed src="C:/Users/User/source/repos/VoucherAutomationSystem/wwwroot/images/@file.FileUrl" style="height:297mm; width:210mm; display: flex; align-items: center; flex-wrap: wrap;" />
+        <br />
+    }
+    <br />
+
+
+</div>
+<link href="~/lib/bootstrap/css/bootstrap.css" rel="stylesheet" />
+<link href="~/lib/bootstrap/css/bootstrap-grid.css" rel="stylesheet" />
+<link href="~/lib/bootstrap/css/bootstrap-reboot.css" rel="stylesheet" />
+<style>
+    table, th, td {
+        
+        border-collapse: collapse;
+        padding: 10px;
+    }
+
+    .column {
+        float: left;
+        width: 47.5%;
+        padding: 10px;
+    }
+
+    .row::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    tr.border-bottom td {
+        border-bottom: dotted 2px #000;
+    }
+</style>

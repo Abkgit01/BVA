@@ -1,0 +1,492 @@
+﻿@model VoucherCashBookViewModel
+@{
+
+    ViewBag.Title = "Vouchers Action";
+}
+
+<div class="mt-3">
+
+
+    <div id="VoucherAction">
+
+
+        <div class="row">
+
+            <div class="col-sm-6">
+                @{
+                    var VoucherId = @Model.Voucher.Id.ToString("D3");
+                }
+                @if (Model.Voucher.VoucherType == VoucherType.Payment)
+                {
+                    <h6 class="card-title"> Voucher Information : Reference Voucher :<b class="text-primary"> PAY @VoucherId </b> </h6>
+                    <hr />
+                }
+                else
+                {
+                    <h6 class="card-title"> Voucher Information : Reference Voucher :<b class="text-primary"> REC @VoucherId </b> </h6>
+                    <hr />
+                }
+
+
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        <tr>
+                            <td> Account Payee </td>
+                            <td class="text-left">  @Model.Voucher.Payee </td>
+                        </tr>
+                        <tr>
+                            <td> Payee Address </td>
+                            <td class="text-left"> @Model.Voucher.Address </td>
+                        </tr>
+                        <tr>
+                            <td> Phone No </td>
+                            <td class="text-left">@Model.Voucher.PhoneNo </td>
+                        </tr>
+
+                        <tr>
+                            <td> Name </td>
+                            <td class="text-left"> @Model.Voucher.Name </td>
+                        </tr>
+                        <tr>
+                            <td>Bank Name </td>
+                            <td class="text-left">  @Model.Voucher.BankName  </td>
+                        </tr>
+
+                        <tr>
+                            <td> Bank Account No </td>
+                            <td class="text-left"> @Model.Voucher.AccountNo </td>
+                        </tr>
+                        <tr>
+                            <td> Description </td>
+                            <td class="text-left"> <small>@Model.Voucher.Description</small> </td>
+                        </tr>
+                        <tr>
+                            <td> Voucher Date </td>
+                            <td class="text-left"> @Model.Voucher.DateCreated </td>
+                        </tr>
+                        <tr>
+                            <td> Voucher Type </td>
+                            <td class="text-left"> @Model.Voucher.VoucherType </td>
+                        </tr>
+                        <tr>
+                            <td>Cheque NO </td>
+                            <td class="text-left"> @Model.Voucher.ChequeNo </td>
+                        </tr>
+                        <tr>
+                            <td> Currency </td>
+                            <td class="text-left"> @Model.Voucher.Currency </td>
+                        </tr>
+                        <tr>
+                            <td> Exchange Rate </td>
+                            <td class="text-left"> @Model.Voucher.ExchangeRate </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br />
+
+            </div>
+
+            <div class="col-sm-6">
+
+                @*<div>
+                    <h5 class=""> Submitted Documents </h5>
+                    <hr />
+                    @if (apps.appDocuuments.Count() > 0)
+                    {
+                        <small class="text-primary"><b> @apps.appDocuuments.Count() Submitted documents </b></small>
+                        <br />
+                        foreach (var appDoc in apps.appDocuuments)
+                        {
+                            var imgs = "";
+
+                            if (appDoc.DocSource.Contains("democontent") == true)
+                            {
+                                imgs = appDoc.DocSource.Replace("democontent", "content");
+                            }
+                            else
+                            {
+                                imgs = appDoc.DocSource;
+                            }
+
+                            <a href="@imgs" target="_blank" style="color:darkslategrey; font-size:small">
+                                <div class="" style="border:1px solid #dadada; padding:10px; margin-top:10px; cursor:pointer" title="Click to view document">
+                                    <i class="far fa-file-alt fa-lg text-danger"></i>
+                                    <span class=""> @appDoc.DocName </span>
+
+                                    @if (appDoc.isAddictional == true)
+                                    {
+                                        <span class="text-danger">(Addictional Document)</span>
+                                    }
+                                </div>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <b class="text-danger"> No documents submitted yet </b>
+                    }
+                </div>
+
+                <hr />*@
+
+                <div>
+
+
+                    <div>
+                        <b class="text-primary"> Cash Book</b>
+                        <p></p>
+
+                        <table class="table table-warning table-striped table-bordered" style="font-size:small">
+                            <thead>
+                                <tr>
+                                    <th>Particulars</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var t in Model.CashBooks)
+                                {
+                                    <tr>
+                                        <td>@t.Particular</td>
+                                        <td><small>@t.Description</small></td>
+                                        <td>&#8358;@String.Format("{0:n0}", @t.Amount)</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td></td>
+                                    <td>Total Amount :</td>
+                                    <td> <b>&#8358;@String.Format("{0:n0}", @Model.Voucher.TotalAmount)</b> </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <br />
+
+
+                </div>
+                <div>
+
+
+                    <div>
+                        <b class="text-primary">Actions</b>
+                        <p></p>
+
+                        <table class="table table-warning table-striped table-bordered" style="font-size:small">
+                            <thead>
+                                <tr>
+                                    <th>Approval Level</th>
+                                    <th>Action Performed</th>
+                                    <th>Comment</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var s in Model.Actions)
+                                {
+                                    <tr>
+                                        <td>@s.UserName</td>
+                                        <td>@s.ActionPerformed</td>
+                                        <td><small>@s.Comment</small></td>
+                                        <td>@s.DateUpdated</td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <br />
+
+
+                </div>
+                <form action="/" method="post">
+                    <textarea id="txtComment" placeholder="Add comment?" class="pb-cmnt-textarea form-control border border-dark" required></textarea><br>
+                </form>
+            </div>
+
+        </div>
+        @if (User.IsInRole("AccountOfficer"))
+        {
+    <div style="text-align:center;" class="pb-4">
+        <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+        @if (Model.Voucher.CurrentLevelRoleName == "AccountOfficer")
+        {
+            <button id="btnEditAll" class="btn btn-sm btn-success">Edit Voucher</button>
+
+        }
+        else if ((Model.Voucher.CurrentLevelRoleName == "ChiefAccountant"  && Model.Voucher.RoleCreator == "AccountOfficer"))
+        {
+            <button id="btnEditAll" class="btn btn-sm btn-success">Edit Voucher</button>
+        }
+    </div>
+        }
+        else if (User.IsInRole("ChiefAccountant"))
+        {
+
+    <div style="text-align:center;" class="pb-4">
+        @if (Model.Voucher.CurrentLevelRoleName == "ChiefAccountant" && Model.Voucher.RoleCreator == "ChiefAccountant")
+        {
+           
+            <button id="btnEditAll" class="btn btn-sm btn-success">Edit</button>
+            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+        }
+        else if (Model.Voucher.CurrentLevelRoleName == "ChiefAccountant" && Model.Voucher.RoleCreator == "AccountOfficer")
+        {
+            <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
+            <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
+            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+        }
+        else if ((Model.Voucher.CurrentLevelRoleName == "Authorizer1" || Model.Voucher.CurrentLevelRoleName == "Approval") && Model.Voucher.RoleCreator == "ChiefAccountant")
+        {
+            <button id="btnEditAll" class="btn btn-sm btn-success">Edit Voucher</button>
+            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+        }
+        else
+        {
+            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+        }
+    </div>
+        }
+        else if (User.IsInRole("Authorizer1"))
+        {
+            if (Model.Voucher.CurrentLevelRoleName == "Authorizer1")
+            {
+                <div style="text-align:center;" class="pb-4">
+
+                    <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
+                    <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                </div>
+            }
+            else
+            {
+                <div style="text-align:center;" class="pb-4">
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                </div>
+            }
+        }
+        else if (User.IsInRole("Authorizer2"))
+        {
+            if (Model.Voucher.CurrentLevelRoleName == "Authorizer2")
+            {
+                <div style="text-align:center;" class="pb-4">
+
+                    <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
+                    <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                </div>
+            }
+            else
+            {
+                <div style="text-align:center;" class="pb-4">
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                </div>
+            }
+        }
+        else if (User.IsInRole("Approval"))
+        {
+            if (Model.Voucher.CurrentLevelRoleName == "Approval")
+            {
+                <div style="text-align:center;" class="pb-4">
+
+                    <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
+                    <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                </div>
+            }
+            else
+            {
+                <div style="text-align:center;" class="pb-4">
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                </div>
+            }
+        }
+
+
+    </div>
+
+
+</div>
+<style>
+    /*body {
+        background: #DCDCDC;
+    }*/
+
+    .pb-cmnt-textarea {
+        resize: none;
+        padding: 20px;
+        height: 130px;
+        width: 100%;
+        border: 1px solid #F2F2F2;
+    }
+
+    .Submitloader {
+        position: relative;
+    }
+
+        .Submitloader::after {
+            background-color: rgba(0,0,0,0.4);
+            content: 'Submitting...';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+</style>
+<script>
+    function CommaFormatted(amount) {
+        var delimiter = ","; // replace comma if desired
+        var a = amount.split('.', 2)
+        var d = a[1];
+        var i = parseInt(a[0]);
+        if (isNaN(i)) { return ''; }
+        var minus = '';
+        if (i < 0) { minus = '-'; }
+        i = Math.abs(i);
+        var n = new String(i);
+        var a = [];
+        while (n.length > 3) {
+            var nn = n.substr(n.length - 3);
+            a.unshift(nn);
+            n = n.substr(0, n.length - 3);
+        }
+        if (n.length > 0) { a.unshift(n); }
+        n = a.join(delimiter);
+        if (d.length < 1) { amount = n; }
+        else { amount = n + '.' + d; }
+        amount = minus + amount;
+        return amount;
+    }
+</script>
+<script>
+
+    $("#btnApproveAll").on('click', function (event) {
+        event.preventDefault();
+        var textArea = $("#txtComment").val();
+        if (textArea == "") {
+            alert("Comment is required.");
+            return false;
+        }
+
+        var msg = confirm("Are you sure you want to approve this voucher?");
+
+        if (msg === true) {
+            $("#VoucherAction").addClass("Submitloader");
+            var VoucherActionViewModel =
+            {
+
+                Comment: $("#txtComment").val(),
+                Id: @Model.Voucher.Id,
+                ActionPerformed: 2
+            };
+            $(".error").remove();
+            $.post("/Voucher/VoucherAction",
+                {
+
+                    "voucherCashBookViewModel": VoucherActionViewModel,
+                },
+                function (response) {
+
+                    var res = response.split("|");
+                    debugger;
+                    if ($.trim(res[0]) === "1") {
+                        alert(res[1]);
+                        var location = window.location.origin + "/Voucher/VouchersPending";
+                        window.location.href = location;
+                        $("#VoucherAction").removeClass("Submitloader");
+                    }
+
+                    else {
+                        $("#VoucherAction").removeClass("Submitloader");
+                        //ErrorMessage("#FormCreateNewApplicationInfo", res[1].trim());
+                        alert(res[1]);
+                        var location = window.location.origin + "/Voucher/VouchersPending";
+                        window.location.href = location;
+                        $("#VoucherAction").removeClass("Submitloader");
+
+                    }
+                });
+
+        }
+    });
+
+    $("#btnRejectAll").on('click', function (event) {
+        event.preventDefault();
+        var textArea = $("#txtComment").val();
+        if (textArea == "") {
+            alert("Comment is required.");
+            return false;
+        }
+
+        var msg = confirm("Are you sure you want to reject this voucher?");
+
+        if (msg === true) {
+            $("#VoucherAction").addClass("Submitloader");
+            var VoucherActionViewModel =
+            {
+
+                Comment: $("#txtComment").val(),
+                Id: @Model.Voucher.Id,
+                ActionPerformed: 3
+            };
+            $(".error").remove();
+            $.post("/Voucher/VoucherAction",
+                {
+
+                    "voucherCashBookViewModel": VoucherActionViewModel,
+                },
+                function (response) {
+
+                    var res = response.split("|");
+                    debugger;
+                    if ($.trim(res[0]) === "1") {
+                        alert(res[1]);
+                        var location = window.location.origin + "/Voucher/VouchersPending";
+                        window.location.href = location;
+                        $("#VoucherAction").removeClass("Submitloader");
+                    }
+
+                    else {
+                        $("#VoucherAction").removeClass("Submitloader");
+                        //ErrorMessage("#FormCreateNewApplicationInfo", res[1].trim());
+                        alert(res[1]);
+                        var location = window.location.origin + "/Voucher/VouchersPending";
+                        window.location.href = location;
+                        $("#VoucherAction").removeClass("Submitloader");
+                    }
+                });
+
+        }
+    });
+
+    $("#btnEditAll").on('click', function (event) {
+        event.preventDefault();
+
+        var location = window.location.origin + "/Voucher/EditVoucher/@Model.Voucher.Id";
+        $("#VoucherAction").addClass("Submitloader");
+                window.location.href = location;
+                $("#AppDiv").removeClass("Submitloader");
+
+    });
+    $("#btnViewFile").on('click', function (event) {
+        event.preventDefault();
+
+        var location = window.location.origin + "/Voucher/GetVoucherFiles/@Model.Voucher.Id";
+                window.location.href = location;
+
+    });
+
+</script>

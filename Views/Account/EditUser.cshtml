@@ -1,0 +1,98 @@
+﻿@model ApplicationUser
+@{
+
+    ViewBag.Title = "Registration Page";
+}
+
+
+<div class="container register">
+    <div class="row">
+        <div class="col-md-3 register-left">
+            <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="" />
+        </div>
+        <div class="col-md-9 register-right">
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <h3 class="register-heading" style="text-align:center; color : #092f89 ;">Edit Account</h3>
+                    <form id="registerForm" class="row register-form">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input id="txtFirstName" type="text" class="form-control" placeholder="First Name *" value="@Model.FirstName" required />
+                            </div>
+                            <div class="form-group">
+                                <input id="txtLastName" type="text" class="form-control" placeholder="Last Name *" value="@Model.LastName" required />
+                            </div>
+                            <input id="btnsubmit" type="submit" class="btnRegister" value="Edit" />
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input id="txtEmail" type="email" class="form-control" placeholder="Your Email *" value="@Model.Email" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Signature Image(.img)</label>
+                                <input type="file" id="txtPhoto" class="form-control" placeholder="Signature *" value="@Model.SignatureImage" />
+                            </div>
+
+
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        body {
+            background: #DCDCDC;
+        }
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $("#registerForm").on('submit', function (event) {
+                console.log(event)
+                event.preventDefault();
+                var msg = confirm("Are you sure you want to edit your account?");
+                //Serialize the form datas.
+                var fileUpload = $("#txtPhoto").get(0);
+                var files = fileUpload.files;
+                var data = new FormData();
+                data.append("Photo", files[0]);
+                data.append("FirstName", $("#txtFirstName").val());
+                data.append("LastName", $("#txtLastName").val());
+                data.append("Email", $("#txtEmail").val());
+                if (msg === true) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Account/EditUser",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        async: false,
+                        success: function (response) {
+                            var res = response.split("|");
+                            debugger;
+                            if ($.trim(res[0]) === "1") {
+                                //SuccessMessage("#registerForm", "Registration created successfully...");
+                                alert(res[1]);
+                                var location = window.location.origin + "/voucher/dashboard";
+                                window.location.href = location;
+                                $("#AppDiv").removeClass("Submitloader");
+                            }
+                            else {
+                                $("#AppDiv").removeClass("Submitloader");
+                                //ErrorMessage("#FormCreateNewApplicationInfo", res[1].trim());
+                                alert(res[1]);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+</div>

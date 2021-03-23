@@ -1,0 +1,193 @@
+﻿@model ViewAllVouchersModel
+@inject SignInManager<ApplicationUser> signInManager;
+@{
+
+    ViewBag.Title = "VIew all vouchers";
+}
+
+
+<div class="">
+
+    @*<div class="row" id="BackImage">
+
+            <br />
+            <h3 class="DashCompanyName"> My Application List </h3>
+            <hr />
+        </div>*@
+    <br />
+    <h4 style="text-align:center; color: #092f89;">All Vouchers</h4>
+
+    <div class="" id="MyAppsTableData">
+        <form method="post">
+            <div class="form-group form-inline">
+                <label for="MinimumDate">Minimum Date : </label>
+                <input asp-for="MinimumDate" value="" placeholder="Minimum Date" style="width:350px" class="form-control input-sm" />
+            </div>
+            <div class="form-group form-inline">
+                <label for="NaximumDate">Maximum Date : </label>
+                <input asp-for="MaximumDate" value="" placeholder="Maximum Date" style="width:350px" class="form-control input-sm" />
+            </div>
+            @*<button type="submit" class="btn btn-primary">Search Date</button>*@
+            <input type="submit" value="Search By Date" formaction=@Url.Action("SearchByDate") formmethod="post" class="btn btn-primary" />
+            <br />
+        </form>
+        <br />
+        <table class="table table-bordered table-hover" id="MyAppsTable" style="font-size:small">
+            <thead>
+                <tr>
+                    <th> Ref-No.</th>
+                    <th> Current Level</th>
+                    <th> Description </th>
+                    <th> Amount </th>
+                    <th> Status </th>
+                    <th> Date Created </th>
+                    <th> Voucher </th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var a in Model.vouchers)
+                {
+
+                    var VoucherId = @a.Id.ToString("D3");
+
+                    <tr>
+
+                        @if (a.VoucherType == VoucherType.Payment)
+                        {
+                            <td class="text-danger"> <b>PAY@{@VoucherId}</b> </td>
+                        }
+                        else
+                        {
+                            <td class="text-danger"> <b>REC@{@VoucherId}</b> </td>
+                        }
+                        @if (a.IsActive == true)
+                        {
+                            <td> Approved</td>
+                        }
+                        else
+                        {
+                            <td> @a.CurrentLevelRoleName</td>
+                        }
+
+
+                        <td><small>@a.Description</small> </td>
+                        <td>&#8358;@String.Format("{0:n0}", @a.TotalAmount)</td>
+                        @{
+                            if (a.IsActive == true)
+                            {
+                                <td> <span class="btn btn-success btn-sm"> Approved </span> </td>
+                            }
+                            else
+                            {
+                                <td> <span class="btn btn-warning btn-sm"> Processing </span> </td>
+                            }
+                        }
+                        <td> @a.DateCreated</td>
+                        <td>
+                            @if (signInManager.IsSignedIn(User) && (User.IsInRole("ChiefAccountant") || User.IsInRole("AccountOfficer")))
+                            {
+                                <div class="" role="group">
+                                    @if (a.IsActive == true)
+                                    {
+                                        <a href="/voucher/viewvoucher/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+                                    }
+                                    else if ((a.CurrentLevelRoleName == "AccountOfficer") || (a.CurrentLevelRoleName == "ChiefAccountant") || (a.CurrentLevelRoleName == "Approval") || (a.CurrentLevelRoleName == "Authorizer1"))
+                                    {
+                                        <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+
+                                    }
+                                    else
+                                    {
+                                        <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+                                    }
+
+                                    <p></p>
+
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="" role="group">
+                                    @if (a.IsActive == true)
+                                    {
+                                        <a href="/voucher/viewvoucher/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View</a>
+                                    }
+
+                                    <p></p>
+
+                                </div>
+                            }
+
+
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.print.min.js"></script>
+<script>
+    $("#btnViewFile").on('click', function (event) {
+        event.preventDefault();
+        var minDate = $("#min").val();
+        var maxDate = $("#max").val();
+        if (minDate > maxDate) {
+            alert("Minimum date is greater than maximum date.");
+            return false;
+        }
+        $("#MyAppsTableData").addClass("Submitloader");
+        var searchByDateViewModel =
+        {
+
+            MinimumDate: minDate,
+            MaximumDate: maxDate
+        };
+        debugger
+        $.post("/Voucher/SearchByDate", { "searchBydateViewModel": searchByDateViewModel }, function (response) {
+            var res = $.trim(response).split("|");
+            if (res[0] === "1") {
+                alert(res[2]);
+                var location = window.location.origin + "/Voucher/AddFiles/" + res[1];
+                window.location.href = location;
+                $("#FormCreateVoucher").removeClass("Submitloader");
+            }
+            else {
+                ErrorMessage("#SaveTankInfo", res[1]);
+                $("#FormCreateVoucher").removeClass("Submitloader");
+            }
+        });
+
+    });
+
+    $(document).ready(function () {
+        $('#MyAppsTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+            ],
+            "aaSorting": []
+        });
+    });
+</script>

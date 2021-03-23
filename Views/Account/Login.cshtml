@@ -1,0 +1,99 @@
+﻿@{
+
+    ViewBag.Title = "Login Page";
+}
+
+
+<div class="container register">
+    <div class="row">
+        <div class="col-md-3 register-left">
+            <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="" />
+            <h3>Welcome</h3>
+            <p>Login to your account!</p>
+            @*<input type="submit" name="" onclick="window.location='/Account/Registration';" value="Register" /><br />*@
+        </div>
+        <div class="col-md-9 register-right">
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <h3 class="register-heading" style="text-align:center; color : #092f89 ;">Automated Voucher System</h3>
+                    <form id="loginForm" class="row register-form">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input id="txtEmail" type="email" class="form-control" placeholder="Your Email *" value="" />
+                            </div>
+
+                            <div class="form-group">
+                                <input id="txtPassword" type="password" class="form-control" placeholder="Password *" value="" />
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="txtRememberMe">
+                                <label class="form-check-label" for="RememberMe">Remember Me</label>
+                            </div>
+                            <a asp-controller="account" asp-action="passwordresetrequest">Forgot Password</a>
+                            <input id="btnsubmit" type="submit" class="btnRegister" value="Login" />
+
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <style>
+        body {
+            background: #DCDCDC;
+        }
+    </style>
+    <script>
+
+        $(document).ready(function () {
+            $("#loginForm").on('submit', function (event) {
+                console.log(event)
+                event.preventDefault();
+                var data = new FormData();
+
+                //var Login =
+                //{
+
+                //    Email: $("#txtEmail").val(),
+                //    Password: $("#txtPassword").val(),
+                //    RememberMe: $("input#txtRememberMe").prop("checked")
+
+                //};
+                data.append("Email", $("#txtEmail").val());
+                data.append("Password", $("#txtPassword").val());
+                data.append("RememberMe", $("input#txtRememberMe").prop("checked"));
+
+                $(".error").remove();
+                debugger
+                $.ajax({
+                    type: "POST",
+                    url: "/Account/Login",
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    async: false,
+                    success: function (response) {
+                        var res = response.split("|");
+                        if ($.trim(res[0]) === "1") {
+                            //SuccessMessage("#registerForm", "Registration created successfully...");
+                            //alert(res[1]);
+                            var location = window.location.origin + "/voucher/dashboard";
+                            window.location.href = location;
+                            $("#AppDiv").removeClass("Submitloader");
+                        }
+                        else {
+                            $("#AppDiv").removeClass("Submitloader");
+                            //ErrorMessage("#FormCreateNewApplicationInfo", res[1].trim());
+                            alert(res[1]);
+                        }
+                    }
+                });
+
+
+            });
+        });
+    </script>
+</div>

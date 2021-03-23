@@ -1,0 +1,328 @@
+﻿@model DashBoardViewModel
+<!-- Styles -->
+
+<style>
+    #chartdiv {
+        width: 100%;
+        height: 350px;
+    }
+</style>
+<!-- Styles -->
+<style>
+    #chartdiv1 {
+        width: 70%;
+        height: 350px;
+    }
+</style>
+<!-- Styles -->
+<style>
+    #chartdiv2 {
+        width: 100%;
+        height: 400px;
+    }
+</style>
+<style>
+    .DashCount {
+        opacity: 1;
+        float: left;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        width: initial;
+        text-align: center;
+        padding: 10px;
+        background-color: #0e2252;
+        color: white;
+        min-height: 50px;
+        width: inherit;
+        font-weight: bolder;
+        display: inline-block;
+        width: 200px;
+    }
+    #BackImage {
+        /*background: url('/images/index-bg2.png');*/
+        background: url('/images/blueimage.jpg');
+        height: 80%;
+        padding: 20px 30px 20px 30px;
+        color: whitesmoke;
+        background-repeat: no-repeat;
+        background-size: 100%
+    }
+
+    .FirstDashCount {
+        min-height: 120px;
+        text-align: center;
+        box-sizing: border-box;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgb(0, 0, 0);
+        background-color: #11285f;
+        color: #f1f0f0;
+        opacity: 1;
+        text-align: center;
+        vertical-align: middle;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        width: 200px;
+    }
+
+        .FirstDashCount > a > b {
+            font-size: 90px;
+        }
+        .FirstDashCount >  b {
+            font-size: 90px;
+        }
+</style>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/frozen.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+<script>
+    am4core.ready(function () {
+
+        // Themes begin
+        am4core.useTheme(am4themes_frozen);
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        var chart = am4core.create("chartdiv", am4charts.XYChart);
+        chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+        chart.data = [{
+ "month": "Jan",
+ "count": @Model.JanCount
+}, {
+ "month": "Feb",
+ "count": @Model.FebCount
+}, {
+ "month": "March",
+ "count": @Model.MarchCount
+}, {
+ "month": "April",
+ "count": @Model.AprilCount
+}, {
+ "month": "May",
+ "count": @Model.MayCount
+}, {
+ "month": "June",
+ "count": @Model.JuneCount
+}, {
+ "month": "July",
+ "count": @Model.JulyCount
+}, {
+ "month": "Aug",
+ "count": @Model.AugCount
+}, {
+ "month": "Sept",
+ "count": @Model.SeptCount
+}, {
+ "month": "Oct",
+ "count": @Model.OctCount
+}, {
+ "month": "Nov",
+ "count": @Model.NovCount
+}, {
+ "month": "Dec",
+ "count": @Model.DecCount
+}];
+
+        var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.dataFields.category = "month";
+        categoryAxis.renderer.minGridDistance = 40;
+        categoryAxis.fontSize = 11;
+        categoryAxis.renderer.labels.template.dy = 5;
+        categoryAxis.renderer.minGridDistance = 30;
+
+
+
+
+
+        var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.min = 0;
+        valueAxis.renderer.minGridDistance = 30;
+        valueAxis.renderer.baseGrid.disabled = true;
+
+
+        var series = chart.series.push(new am4charts.ColumnSeries());
+        series.dataFields.categoryX = "month";
+        series.dataFields.valueY = "count";
+        series.columns.template.tooltipText = "{valueY.value}";
+        series.columns.template.tooltipY = 0;
+        series.columns.template.strokeOpacity = 0;
+
+        // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
+        series.columns.template.adapter.add("fill", function (fill, target) {
+            return chart.colors.getIndex(target.dataItem.index);
+        });
+
+    }); // end am4core.ready()
+</script>
+<!-- HTML -->
+<!-- Chart code -->
+<script>
+    am4core.ready(function () {
+
+        // Themes begin
+        am4core.useTheme(am4themes_frozen);
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        // Create chart instance
+        var chart = am4core.create("chartdiv1", am4charts.PieChart);
+        chart.radius = am4core.percent(53);
+        // Add data
+        chart.data = [{
+            "action": "Approved",
+            "count": @Model.ApprovalCount
+        },{
+            "action": "Created",
+            "count": @Model.CreatedCount
+        }, {
+            "action": "Rejected",
+            "count": @Model.RejectedCount
+        }, {
+            "action": "Edited",
+            "count": @Model.EditedCount
+        }];
+
+        // Add and configure Series
+        var pieSeries = chart.series.push(new am4charts.PieSeries());
+        pieSeries.labels.template.maxWidth = 100;
+        pieSeries.labels.template.wrap = true;
+        pieSeries.dataFields.value = "count";
+        pieSeries.dataFields.category = "action";
+        pieSeries.slices.template.stroke = am4core.color("#fff");
+        pieSeries.slices.template.strokeWidth = 2;
+        pieSeries.slices.template.strokeOpacity = 1;
+
+        // This creates initial animation
+        pieSeries.hiddenState.properties.opacity = 1;
+        pieSeries.hiddenState.properties.endAngle = -90;
+        pieSeries.hiddenState.properties.startAngle = -90;
+
+    }); // end am4core.ready()
+</script>
+
+<!-- Chart code -->
+<script>
+    am4core.ready(function () {
+
+        // Themes begin
+        am4core.useTheme(am4themes_frozen);
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        // Create chart instance
+        var chart = am4core.create("chartdiv2", am4charts.PieChart);
+        chart.radius = am4core.percent(53);
+        // Add data
+        chart.data = [{
+            "level": "Approved",
+            "count": @Model.ActiveCount
+        }, {
+            "level": "Pending",
+            "count": @Model.InactiveCount
+        }];
+
+        // Add and configure Series
+        var pieSeries = chart.series.push(new am4charts.PieSeries());
+        pieSeries.labels.template.maxWidth = 100;
+        pieSeries.labels.template.wrap = true;
+        pieSeries.dataFields.value = "count";
+        pieSeries.dataFields.category = "level";
+        pieSeries.slices.template.stroke = am4core.color("#fff");
+        pieSeries.slices.template.strokeWidth = 2;
+        pieSeries.slices.template.strokeOpacity = 1;
+
+        // This creates initial animation
+        pieSeries.hiddenState.properties.opacity = 1;
+        pieSeries.hiddenState.properties.endAngle = -90;
+        pieSeries.hiddenState.properties.startAngle = -90;
+
+    }); // end am4core.ready()
+</script>
+<div style="height:230px" id="BackImage">
+    <div class="row">
+
+        <div  class="col-sm-3">
+            <div class="FirstDashCount">
+                <a href="/voucher/viewallvouchers"><b style="opacity:1.5; color:white">@Model.TotalVouchers</b></a>
+            </div>
+            <div class="DashCount">
+                All Vouchers
+            </div>
+
+        </div>
+
+        <div class="col-sm-3">
+            <div class="FirstDashCount">
+                @*<a href="/voucher/viewinactivevouchers"><b style="opacity:1.5; color:white">@Model.InactiveCount</b></a>*@
+                <b style="opacity:1.5; color:white">@Model.InactiveCount</b>
+            </div>
+            <div class="DashCount">
+                On Processing
+            </div>
+        </div>
+
+        <div class="col-sm-3">
+            <div class="FirstDashCount">
+                <a href="/voucher/viewactivevouchers"><b style="opacity:1.5; color:white">@Model.ActiveCount</b></a>
+            </div>
+            <div class="DashCount">
+                Total Approval(s)
+            </div>
+        </div>
+
+        <div class="col-sm-3">
+            <div class="FirstDashCount">
+                <a href="/voucher/voucherspending"><b style="opacity:1.5; color:white">@Model.PendingCount</b></a>
+            </div>
+            <div class="DashCount">
+                On my desk
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="margin-left: 200px;">
+    <br /> 
+    @if (@Model.PendingCount > 0)
+    {
+        <p>
+            <b class="text-danger" style=""> You have <b>@Model.PendingCount</b> vouchers on your desk. Kindly go to <a href="/voucher/voucherspending"> my desk </a> and continue.</b> <br />
+        </p>
+    }
+    else
+    {
+        <p>
+            <b class="text-danger"> You have no voucher on your desk. </b> <br />
+        </p>
+    }
+</div>
+
+<div>
+    
+    <div class="row">
+
+        <div class="col-sm-6">
+            <div style="display: block; margin-right: auto;">
+                <div id="chartdiv"></div>
+                <b style="margin-left: 20px;color:#0e2252">Chart depicting the amount of vouchers created across the year 2021.</b>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div>
+                <div style="margin-left: 50px;" id="chartdiv1"></div>
+                <b style="color:#0e2252; margin-left: 50px;">Chart depicting actions taken on vouchers.</b>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div style="text-align:center" id="chartdiv2"></div>
+        <b style="margin-left: 300px; color: #0e2252">Chart depicting the amount approved to pending vouchers.</b>
+    </div>
+</div>
+
+
+
+<!-- HTML -->
