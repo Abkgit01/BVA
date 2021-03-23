@@ -205,6 +205,8 @@ namespace VoucherAutomationSystem.Controllers
                 result = "2|Password change was not successful.";
             }
             return Json(result);
+
+
         }
         private string SavePhoto(IFormFile photo)
         {
