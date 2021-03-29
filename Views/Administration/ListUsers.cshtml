@@ -5,7 +5,7 @@
     ViewBag.Title = "All Users";
 }
 
-<h1>All Users</h1>
+<h2>All Users</h2>
 
 @if (Model.Any())
 {
@@ -14,35 +14,50 @@
         Add new user
     </a>
 
-    foreach (var user in Model)
-    {
-        <div class="card mb-3">
-            <div class="card-header">
-                User Id : @user.Id
-            </div>
-            <div class="card-body">
-                <h5 class="card-title">@user.UserName</h5>
-            </div>
-            <div class="card-footer">
 
-                <form method="post" asp-action="DeleteUser" asp-route-id="@user.Id">
-                    @*<a asp-action="EditUser" asp-controller="Administration"
-        asp-route-id="@user.Id"  class="btn btn-primary">Edit</a>*@
+    <div class="container pt-3 pb-3" style="height:auto">
+        @*<h4 style="text-align:center; color: #092f89;">All Users</h4>*@
+        <div>
 
-                    @if (user.IsActive == true)
+            <br />
+            <table class="display table table-striped table-bordered" id="VouchersTable" style="font-size:small">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Email</th>
+                        <th>Action </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
                     {
-                        <a asp-action="DeactivateUser" asp-controller="Administration"
-                           asp-route-id="@user.Id" onclick="return confirm('Are you sure you want to deactivate?')" class="btn btn-danger">Deactivate</a>
+
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.UserName</td>
+                            <td>
+                                @if (user.IsActive == true)
+                                {
+                                    <a asp-action="DeactivateUser" asp-controller="Administration"
+                                       asp-route-id="@user.Id" onclick="return confirm('Are you sure you want to deactivate?')" class="btn btn-danger">Deactivate</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="ActivateUser" asp-controller="Administration"
+                                       asp-route-id="@user.Id" onclick="return confirm('Are you sure you want to activate user?')" class="btn btn-primary">Activate</a>
+                                }
+                            </td>
+
+                        </tr>
                     }
-                    else
-                    {
-                        <a asp-action="ActivateUser" asp-controller="Administration"
-                           asp-route-id="@user.Id" onclick="return confirm('Are you sure you want to activate user?')" class="btn btn-primary">Activate</a>
-                    }
-                </form>
-            </div>
+                </tbody>
+            </table>
+            <input type="text" id="txtScheduleID" hidden />
         </div>
-    }
+
+    </div>
+
+
 }
 else
 {
@@ -61,5 +76,31 @@ else
         </div>
     </div>
 }
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.print.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#VouchersTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+            ],
+            //"order": [[4, "desc"]]
+            "aaSorting": []
+        });
+    });
+</script>
 

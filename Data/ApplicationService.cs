@@ -178,13 +178,23 @@ namespace VoucherAutomationSystem.Data
                 throw new Exception("This user does not have permission to edit a product.");
 
             context.Update(voucher);
+            IEnumerable<CashBook> oldCashBook =  context.CashBooks.Where(x => x.VoucherId == voucher.Id);
 
+            foreach (var cashBook in oldCashBook)
+            {
+                context.CashBooks.Remove(cashBook);
+            }
             // Add the CashBook
             int totalAmount = 0;
             foreach (var cashBook in cashBooks)
             {
-                context.Update(cashBook);
-
+                await context.AddAsync(new CashBook
+                {
+                    Amount = cashBook.Amount,
+                    Description = cashBook.Description,
+                    VoucherId = voucher.Id,
+                    Particular = cashBook.Particular
+                });
                 totalAmount += cashBook.Amount;
             }
 
@@ -281,6 +291,7 @@ namespace VoucherAutomationSystem.Data
             return await context.Vouchers.ToListAsync();
         }
 
+        
         public async Task<IEnumerable<Voucher>> GetActiveVouchers()
         {
             return await context.Vouchers.Where(x => x.IsActive == true).ToListAsync();

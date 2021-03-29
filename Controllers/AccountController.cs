@@ -183,12 +183,15 @@ namespace VoucherAutomationSystem.Controllers
             }
             return Json(result);
         }
+
+        [Authorize]
         [HttpGet]
         public IActionResult ChangePassword()
         {
             return View();
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel changePasswordViewModel)
         {

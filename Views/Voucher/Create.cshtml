@@ -85,7 +85,7 @@
                 </thead>
 
                 <tbody id="AppendVouchers">
-                    <tr>
+                    <tr id="Remove1">
                         <td>
                             <select id="txtParticular[]" name="txtParticular[]" required" class="form-control form-control-sm form-inline" required>
                                 <option>Select Particular</option>
@@ -99,10 +99,20 @@
                             <input type="text" required class="form-control form-control-sm form-inline" placeholder="Enter Description" id="txtDescriptionCB[]" name="txtDescriptionCB[]" />
                         </td>
                         <td>
-                            <input type="number" required class="form-control form-control-sm form-inline" placeholder="Enter Amount" id="txtAmount[]" name="txtAmount[]" @*onkeyup="sum()"*@ />
+                            <input type="number" required class="form-control form-control-sm form-inline amount" placeholder="Enter Amount" id="txtAmount_1" name="txtAmount[]" onkeyup=sumUp() />
                         </td>
                         <td>
-                            <button class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
+                        </td>
+                       
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr style="font-size:medium;">
+                        <td></td>
+                        <td><b>Total Amount</b></td>
+                        <td>
+                            <b><span id="sum_total"></span></b>
                         </td>
                     </tr>
                 </tbody>
@@ -152,13 +162,13 @@
         Vouchers_i++;
         var html = "<tr id='Remove" + Vouchers_i + "'><td><select id='txtParticular[]' name='txtParticular[]' required' class='form-control form-control-sm form-inline'><option>Select Particular</option> @foreach (var b in Model) { <option value= '@b.Name' > @b.Name </option> } </select> </td>";
         html += "<td><input type='text' required class='form-control form-control-sm form-inline' placeholder='Enter Description' id ='txtDescriptionCB[]' name='txtDescriptionCB[]' /></td >";
-        html += "<td><input type='number' required class='form-control form-control-sm form-inline' placeholder='Enter Amount' id='txtAmount[]' name='txtAmount[]' /></td >";
-        html += "<td> <button class='btn btn-danger btn-sm' onclick='RemoveVoucher();'> <i class='fa fa-trash'> </i> </button> </td> </tr >";
+        html += "<td><input type='number' onkeyup=sumUp() required class='form-control form-control-sm form-inline amount' placeholder='Enter Amount' id='txtAmount_" + Vouchers_i + "' name='txtAmount[]' /></td >";
+        html += "<td> <button class='btn btn-danger btn-sm'  onclick='RemoveVoucher("+Vouchers_i+");'> <i class='fa fa-trash'> </i> </button> </td> </tr >";
         $("#AppendVouchers tr:last").after(html);
     }
-    function RemoveVoucher() {
-        $("#Remove" + Vouchers_i).remove();
-        Vouchers_i--;
+    function RemoveVoucher(target_id) {
+        $("#Remove" + target_id).remove();
+        sumUp();
     }
 </script>
 @*<script type="text/javascript">
@@ -176,6 +186,18 @@
         }
     </script>*@
 <script>
+    function sumUp() {
+        var total = 0;
+        $(".amount").each(function () {
+            var unitId = "#"+ this.id ;
+            var d = $(unitId).val();
+            console.log(this.id);
+            if (d != null&& d !='') {
+                total = total + parseInt(d);
+            }
+        });
+        $("#sum_total").html(total)
+    }
     $("#createVoucherForm").on('submit', function (event) {
         console.log(event)
         event.preventDefault();

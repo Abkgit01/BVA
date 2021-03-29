@@ -180,7 +180,7 @@
                         <table class="table table-warning table-striped table-bordered" style="font-size:small">
                             <thead>
                                 <tr>
-                                    <th>Approval Level</th>
+                                    <th>Action By</th>
                                     <th>Action Performed</th>
                                     <th>Comment</th>
                                     <th>Date</th>
@@ -191,7 +191,7 @@
                                 @foreach (var s in Model.Actions)
                                 {
                                     <tr>
-                                        <td>@s.UserName</td>
+                                        <td>@s.User.FirstName @s.User.LastName</td>
                                         <td>@s.ActionPerformed</td>
                                         <td><small>@s.Comment</small></td>
                                         <td>@s.DateUpdated</td>
@@ -216,7 +216,7 @@
         @if (User.IsInRole("AccountOfficer"))
         {
     <div style="text-align:center;" class="pb-4">
-        <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+        <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
         @if (Model.Voucher.CurrentLevelRoleName == "AccountOfficer")
         {
             <button id="btnEditAll" class="btn btn-sm btn-success">Edit Voucher</button>
@@ -236,22 +236,22 @@
         {
            
             <button id="btnEditAll" class="btn btn-sm btn-success">Edit</button>
-            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+            <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
         }
         else if (Model.Voucher.CurrentLevelRoleName == "ChiefAccountant" && Model.Voucher.RoleCreator == "AccountOfficer")
         {
             <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
             <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
-            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+            <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
         }
         else if ((Model.Voucher.CurrentLevelRoleName == "Authorizer1" || Model.Voucher.CurrentLevelRoleName == "Approval") && Model.Voucher.RoleCreator == "ChiefAccountant")
         {
             <button id="btnEditAll" class="btn btn-sm btn-success">Edit Voucher</button>
-            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+            <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
         }
         else
         {
-            <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+    <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
         }
     </div>
         }
@@ -263,13 +263,13 @@
 
                     <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
                     <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
-                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
                 </div>
             }
             else
             {
                 <div style="text-align:center;" class="pb-4">
-                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
                 </div>
             }
         }
@@ -281,13 +281,13 @@
 
                     <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
                     <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
-                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
                 </div>
             }
             else
             {
                 <div style="text-align:center;" class="pb-4">
-                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
                 </div>
             }
         }
@@ -299,13 +299,13 @@
 
                     <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
                     <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
-                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
                 </div>
             }
             else
             {
                 <div style="text-align:center;" class="pb-4">
-                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View File(s)</button>
+                    <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
                 </div>
             }
         }

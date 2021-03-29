@@ -95,7 +95,7 @@ namespace VoucherAutomationSystem.Controllers
             var actions = await voucherService.GetVoucherActions(Id);
             foreach (var action in actions)
             {
-                action.User = await userManager.FindByIdAsync(action.Id.ToString());
+                action.User = await userManager.Users.FirstOrDefaultAsync(x => x.Id == action.UserId);
                 //action.User = await userManager.Users.FirstOrDefaultAsync(u => u.Id == action.Id);
             }
             return View(new VoucherCashBookViewModel { Voucher = voucher, CashBooks = cashBooks, Actions = actions.OrderBy(x => x.DateUpdated) });
@@ -183,6 +183,28 @@ namespace VoucherAutomationSystem.Controllers
 
             var res = await voucherService.GetVouchersForRole(role.Id, user.Id);
             var vouchers = await voucherService.GetAllVouchers();
+            foreach (var voucher in vouchers)
+            {
+                if (voucher.IsActive == false)
+                {
+                    if (voucher.CurrentLevelRoleName == "Approval")
+                    {
+                        var approval = await context.ApprovalVouchers.FirstOrDefaultAsync(x => x.VoucherId == voucher.Id && x.IsActive == false);
+                        
+                        if (approval != null)
+                        {
+                            var approvalUser = await userManager.Users.FirstOrDefaultAsync(x => x.Id == approval.UserId);
+                            voucher.CurrentLevelRoleName = approvalUser.FirstName + " " + approvalUser.LastName;
+                        }
+                    }
+                    else
+                    {
+                        var voucherUsers = await userManager.GetUsersInRoleAsync(voucher.CurrentLevelRoleName);
+                        var voucherUser = voucherUsers.FirstOrDefault(x => x.IsActive == true);
+                        voucher.CurrentLevelRoleName = voucherUser.FirstName +" "+ voucherUser.LastName;
+                    }
+                }
+            }
             int totalPendingVouchers = res.Count();
             return View(new ViewAllVouchersModel { vouchers = vouchers.OrderByDescending(x => x.DateCreated).ToList(), TotalPendingVouchers = totalPendingVouchers });
         }
