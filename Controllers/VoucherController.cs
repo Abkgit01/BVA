@@ -76,7 +76,11 @@ namespace VoucherAutomationSystem.Controllers
         [HttpGet]
         public async Task<ViewResult> GetVoucher(int Id)
         {
-            var voucher = await voucherService.GetVoucher(Id);
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
+            var voucher = await voucherService.GetVoucher(Id, role.Name);
             var cashBooks = await voucherService.GetCashbook(Id);
             if (voucher == null)
             {
@@ -90,7 +94,11 @@ namespace VoucherAutomationSystem.Controllers
         [HttpGet]
         public async Task<ViewResult> VoucherAction(int Id)
         {
-            var voucher = await voucherService.GetVoucher(Id);
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
+            var voucher = await voucherService.GetVoucher(Id, role.Name);
             var cashBooks = await voucherService.GetCashbook(Id);
             var actions = await voucherService.GetVoucherActions(Id);
             foreach (var action in actions)
@@ -105,8 +113,12 @@ namespace VoucherAutomationSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> EditVoucher(int Id)
         {
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
             var particulars = context.Particulars.ToList(); ;
-            var voucher = await voucherService.GetVoucher(Id);
+            var voucher = await voucherService.GetVoucher(Id, role.Name);
             var cashBooks = await voucherService.GetCashbook(Id);
             var actions = await voucherService.GetVoucherActions(Id);
             if ((voucher.CurrentLevelRoleName == "ChiefAccountant" || voucher.CurrentLevelRoleName == "AccountOfficer") || voucher.CurrentLevelRoleName == "Authorizer1" || voucher.CurrentLevelRoleName == "Approval")
@@ -182,7 +194,7 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
 
             var res = await voucherService.GetVouchersForRole(role.Id, user.Id);
-            var vouchers = await voucherService.GetAllVouchers();
+            var vouchers = await voucherService.GetAllVouchers(role.Name);
             foreach (var voucher in vouchers)
             {
                 if (voucher.IsActive == false)
@@ -222,7 +234,7 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             if (role != null)
             {
-                var res = await voucherService.GetActiveVouchers();
+                var res = await voucherService.GetActiveVouchers(role.Name);
                 return View(res.OrderByDescending(x => x.DateCreated).ToList());
             }
             else
@@ -272,7 +284,7 @@ namespace VoucherAutomationSystem.Controllers
                     if (res.IsActive == false)
                     {
                         var mailUsers = await userManager.GetUsersInRoleAsync(res.CurrentLevelRoleName);
-                        SendMail(res, mailUsers.ToList(), voucherCashBookViewModel.Comment);
+                        await SendMail(res, mailUsers.ToList(), voucherCashBookViewModel.Comment);
                         if (voucherCashBookViewModel.ActionPerformed == 2)
                         {
                             result = "1|Approval successfull!";
@@ -284,8 +296,59 @@ namespace VoucherAutomationSystem.Controllers
                     }
                     else
                     {
-                        var mailUsers = await userManager.Users.ToListAsync();
-                        SendMail(res, mailUsers, voucherCashBookViewModel.Comment);
+                        List<ApplicationUser> mailUsers = new List<ApplicationUser>();
+                        var allUsers = await userManager.Users.ToListAsync();
+                        if (res.TotalAmount > 50000)
+                        {
+                            if (res.RoleCreator == "AccountOfficer")
+                            {
+                                foreach (var mailUser in allUsers)
+                                {
+                                    var userRole = await userManager.GetRolesAsync(mailUser);
+                                    if (userRole != null)
+                                    {
+                                        var roleDetail = await roleManager.FindByNameAsync(userRole.SingleOrDefault());
+                                        if (roleDetail.Name != "Admin" || roleDetail.Name != "Approval")
+                                        {
+                                            mailUsers.Add(mailUser);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (res.RoleCreator == "ChiefAccountant")
+                            {
+                                foreach (var mailUser in allUsers)
+                                {
+                                    var userRole = await userManager.GetRolesAsync(mailUser);
+                                    if (userRole != null)
+                                    {
+                                        var roleDetail = await roleManager.FindByNameAsync(userRole.SingleOrDefault());
+                                        if (roleDetail.Name != "Admin" || roleDetail.Name != "Approval" || roleDetail.Name != "AccountOfficer")
+                                        {
+                                            mailUsers.Add(mailUser);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (var mailUser in allUsers)
+                            {
+                                var userRole = await userManager.GetRolesAsync(mailUser);
+                                if (userRole != null)
+                                {
+                                    var roleDetail = await roleManager.FindByNameAsync(userRole.SingleOrDefault());
+                                    if (roleDetail.Name != "Admin" )
+                                    {
+                                        mailUsers.Add(mailUser);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        //context.Entry(allUsers).State = EntityState.Detached;
+                        await SendMail(res, mailUsers, voucherCashBookViewModel.Comment);
                         if (voucherCashBookViewModel.ActionPerformed == 2)
                         {
                             result = "1|Approval successfull!";
@@ -437,7 +500,7 @@ namespace VoucherAutomationSystem.Controllers
         //}
 
         [HttpGet]
-        public string SendMail(Voucher voucher, List<ApplicationUser> users,string comment)
+        public async Task<string> SendMail(Voucher voucher, List<ApplicationUser> users,string comment)
         {
             MailModel mailModel = new MailModel();
             var result = "";
@@ -484,10 +547,7 @@ namespace VoucherAutomationSystem.Controllers
                 MailMessage mail = new MailMessage();
                 foreach (var user in users)
                 {
-                    if (user.IsActive == true)
-                    {
                         mail.To.Add(user.Email);
-                    }
                 }
                 mail.From = new MailAddress("support@brandonetech.com");
                 mail.Subject = "Voucher Approved";
@@ -498,7 +558,7 @@ namespace VoucherAutomationSystem.Controllers
                 smtp.Host = "smtppro.zoho.com";
                 smtp.Port = 587;
                 smtp.UseDefaultCredentials = false;
-                smtp.Credentials = new System.Net.NetworkCredential("support@brandonetech.com", "*123*brandonetech#"); // Enter senders User name and password       
+                smtp.Credentials = new System.Net.NetworkCredential("suppor@brandonetech.com", "*123*brandonetech#"); // Enter senders User name and password       
                 smtp.EnableSsl = true;
                 smtp.Send(mail);
             }
@@ -511,7 +571,11 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             if (role != null)
             {
-                var voucher = await voucherService.GetVoucher(Id);
+                var voucher = await voucherService.GetVoucher(Id, role.Name);
+                if (voucher == null)
+                {
+                    return RedirectToAction("DashBoard");
+                }
                 var cashBooks = await voucherService.GetCashbook(Id);
                 var actions = await voucherService.GetVoucherActions(Id);
                 var voucherFiles = await voucherService.GetVoucherFiles(Id);
@@ -557,7 +621,7 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             if (role != null)
             {
-                var voucher = await voucherService.GetVoucher(Id);
+                var voucher = await voucherService.GetVoucher(Id, role.Name);
                 var cashBooks = await voucherService.GetCashbook(Id);
                 var actions = await voucherService.GetVoucherActions(Id);
                 var voucherFiles = await voucherService.GetVoucherFiles(Id);
@@ -592,6 +656,7 @@ namespace VoucherAutomationSystem.Controllers
             return View();
         }
 
+
         [HttpGet]
         public async Task<IActionResult> DashBoard()
         {
@@ -602,16 +667,17 @@ namespace VoucherAutomationSystem.Controllers
                 return RedirectToAction("Login", "Account");
             }
             var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             var dashBoard = await voucherService.DashBoard();
             //IEnumerable<Voucher> res;
-            foreach (var role in roles)
+            foreach (var rolee in roles)
             {
-                var rol = await roleManager.FindByNameAsync(role);
+                var rol = await roleManager.FindByNameAsync(rolee);
                 var res = await voucherService.GetVouchersForRole(rol.Id, user.Id);
                 dashBoard.PendingCount = res.Count();
             }
 
-            var allVouchers = await voucherService.GetAllVouchers();
+            var allVouchers = await voucherService.GetAllVouchers(role.Name);
             dashBoard.TotalVouchers = allVouchers.Count();
             return View(dashBoard);
         }
@@ -619,10 +685,14 @@ namespace VoucherAutomationSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchByDate(SearchBydateViewModel searchBydateViewModel)
         {
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
             if (searchBydateViewModel.MinimumDate > searchBydateViewModel.MaximumDate)
                 throw new ArgumentException("From Date cannot be greater than To Date");
             var searchedVouchers = new List<Voucher>();
-            var newVouchers = await voucherService.GetAllVouchers();
+            var newVouchers = await voucherService.GetAllVouchers(role.Name);
             foreach (var voucher in newVouchers)
             {
                 if (voucher.DateCreated >= searchBydateViewModel.MinimumDate && voucher.DateCreated <= searchBydateViewModel.MaximumDate)

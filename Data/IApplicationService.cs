@@ -13,12 +13,12 @@ namespace VoucherAutomationSystem.Data
     {
         Task<Voucher> AddNewVoucher(int UserId, int RoleId, VoucherViewModel voucherViewModel, List<CashBookViewModel> cashBookViewModels);
 
-        Task<IEnumerable<Voucher>> GetActiveVouchers();
+        Task<IEnumerable<Voucher>> GetActiveVouchers(string RoleName);
         Task<IEnumerable<Voucher>> GetInActiveVouchers(int RoleId);
         Task<IEnumerable<Voucher>> GetVouchersForRole(int RoleId, int userId);
         Task<Voucher> PerformActionOnVoucher(int VoucherId, int UserId, int RoleId,
             string Comment, ActionPerformed actionPerformed);
-        Task<Voucher> GetVoucher(int Id);
+        Task<Voucher> GetVoucher(int Id, string RoleName);
         Task<List<CashBook>> GetCashbook(int Id);
         Task<Voucher> EditVoucher(Voucher voucher, List<CashBook> cashBooks, int UserId, int RoleId, string comment);
         Task<List<Models.Action>> GetVoucherActions(int roleId);
@@ -27,7 +27,7 @@ namespace VoucherAutomationSystem.Data
         Task<CashBook> DeleteCashBook(int Id, int UserId, int RoleId);
         Task<Voucher> EditVoucherFiles(int voucherId, VoucherFileViewModel uploadFiles , int UserId, int RoleId);
         Task<Voucher> AddVoucherFiles(int voucherId, List<IFormFile> files, int UserId, int RoleId);
-        Task<IEnumerable<Voucher>> GetAllVouchers();
+        Task<IEnumerable<Voucher>> GetAllVouchers(string RoleName);
         Task<DashBoardViewModel> DashBoard();
 
     }
