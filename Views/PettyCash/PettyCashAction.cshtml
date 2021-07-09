@@ -1,0 +1,330 @@
+﻿@model CompletePettyCashViewModel
+@{
+
+    ViewBag.Title = "Petty Cash Action";
+}
+
+<div class="mt-3">
+
+
+    <div id="CashAdvanceAction">
+
+
+        <div class="row">
+
+            <div class="col-sm-6">
+                @{
+                    var cashAdvanceId = @Model.PettyCash.Id.ToString("D3");
+                }
+                <h6 class="card-title"> Petty Cash Information : Reference No :<b class="text-primary">  @cashAdvanceId </b> </h6>
+                <hr />
+
+
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        <tr>
+                            <td> First Name </td>
+                            <td class="text-left">  @Model.PettyCash.User.FirstName </td>
+                        </tr>
+                        <tr>
+                            <td> Last Name </td>
+                            <td class="text-left">  @Model.PettyCash.User.LastName </td>
+                        </tr>
+                        <tr>
+                            <td> Department </td>
+                            <td class="text-left"> @Model.PettyCash.Dept.Name </td>
+                        </tr>
+
+                        <tr>
+                            <td> Petty Cash Date </td>
+                            <td class="text-left"> @Model.PettyCash.DateCreated</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br />
+
+            </div>
+
+            <div class="col-sm-6">
+
+
+                <div>
+
+
+                    <div>
+                        <b class="text-primary"> Cash Book</b>
+                        <p></p>
+
+                        <table class="table table-warning table-striped table-bordered" style="font-size:small">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                
+                                        <tr>
+                                            <td><small>@Model.PettyCash.Description</small></td>
+                                            <td>&#8358;@String.Format("{0:n}", @Model.PettyCash.TotalAmount)</td>
+                                        </tr>
+                                    <tr>
+                                        <td>Total Amount :</td>
+                                        <td> <b>&#8358;@String.Format("{0:n}", @Model.PettyCash.TotalAmount)</b> </td>
+                                    </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <br />
+
+
+                </div>
+                <div>
+
+
+                    <div>
+                        <b class="text-primary">Actions</b>
+                        <p></p>
+
+                        <table class="table table-warning table-striped table-bordered" style="font-size:small">
+                            <thead>
+                                <tr>
+                                    <th>Action By</th>
+                                    <th>Action Performed</th>
+                                    <th>Comment</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var s in Model.pettyCashActions)
+                                {
+                                    <tr>
+                                        <td>@s.User.FirstName @s.User.LastName</td>
+                                        <td>@s.ActionPerformed</td>
+                                        <td><small>@s.Comment</small></td>
+                                        <td>@s.DateUpdated</td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <br />
+
+
+                </div>
+                <form action="/" method="post">
+                    <textarea id="txtComment" placeholder="Add comment?" class="pb-cmnt-textarea form-control border border-dark" required></textarea><br>
+                </form>
+            </div>
+
+        </div>
+        <div style="text-align:center;" class="pb-4">
+            @if (Model.PettyCash.IsApproved == true)
+            {
+                <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
+            }
+            else
+            {
+
+                @if (Model.CurrentUserId == Model.PettyCash.UserId && Model.PettyCash.CurrentStage == 1)
+                {
+                    <div style="text-align:center;" class="pb-4">
+                        <button id="btnEditAll" class="btn btn-sm btn-success">Edit Voucher</button>
+                    </div>
+                }
+                if (Model.CurrentUserId == Model.pettyCashApproval.UserId && Model.PettyCash.CurrentStage == 2)
+                {
+                    <button id="btnApproveAll" class="btn btn-sm btn-primary">Approve</button>
+                    <button id="btnRejectAll" class="btn btn-sm btn-danger">Reject</button>
+                }
+                
+                <button id="btnViewFile" class="btn btn-sm btn-secondary">View Attached Document(s)</button>
+            }
+
+        </div>
+
+
+    </div>
+    <style>
+            /*body {
+            background: #DCDCDC;
+        }*/
+
+            .pb-cmnt-textarea {
+                resize: none;
+                padding: 20px;
+                height: 130px;
+                width: 100%;
+                border: 1px solid #F2F2F2;
+            }
+
+            .Submitloader {
+                position: relative;
+            }
+
+                .Submitloader::after {
+                    background-color: rgba(0,0,0,0.4);
+                    content: 'Submitting...';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 100%;
+                    width: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    color: white;
+                }
+    </style>
+    <script>
+    function CommaFormatted(amount) {
+        var delimiter = ","; // replace comma if desired
+        var a = amount.split('.', 2)
+        var d = a[1];
+        var i = parseInt(a[0]);
+        if (isNaN(i)) { return ''; }
+        var minus = '';
+        if (i < 0) { minus = '-'; }
+        i = Math.abs(i);
+        var n = new String(i);
+        var a = [];
+        while (n.length > 3) {
+            var nn = n.substr(n.length - 3);
+            a.unshift(nn);
+            n = n.substr(0, n.length - 3);
+        }
+        if (n.length > 0) { a.unshift(n); }
+        n = a.join(delimiter);
+        if (d.length < 1) { amount = n; }
+        else { amount = n + '.' + d; }
+        amount = minus + amount;
+        return amount;
+    }
+    </script>
+    <script>
+
+    $("#btnApproveAll").on('click', function (event) {
+        event.preventDefault();
+        var textArea = $("#txtComment").val();
+        if (textArea == "") {
+            alert("Comment is required.");
+            return false;
+        }
+
+        var msg = confirm("Are you sure you want to approve this petty cash?");
+
+        if (msg === true) {
+            $("#CashAdvanceAction").addClass("Submitloader");
+            var VoucherActionViewModel =
+            {
+
+                Comment: $("#txtComment").val(),
+                Id: @Model.PettyCash.Id,
+                ActionPerformed: 2
+            };
+            $(".error").remove();
+            $.post("/Pettycash/PettyCashAction",
+                {
+
+                    "pettyComplete": VoucherActionViewModel,
+                },
+                function (response) {
+
+                    var res = response.split("|");
+                    debugger;
+                    if ($.trim(res[0]) === "1") {
+                        alert(res[1]);
+                        var location = window.location.origin + "/PettyCash/PendingPettyCash";
+                        window.location.href = location;
+                        $("#CashAdvanceAction").removeClass("Submitloader");
+                    }
+
+                    else {
+                        $("#CashAdvanceAction").removeClass("Submitloader");
+                        //ErrorMessage("#FormCreateNewApplicationInfo", res[1].trim());
+                        alert(res[1]);
+                        var location = window.location.origin + "/PettyCash/PendingPettyCash";
+                        window.location.href = location;
+                        $("#CashAdvanceAction").removeClass("Submitloader");
+
+                    }
+                });
+
+        }
+    });
+
+    $("#btnRejectAll").on('click', function (event) {
+        event.preventDefault();
+        var textArea = $("#txtComment").val();
+        if (textArea == "") {
+            alert("Comment is required.");
+            return false;
+        }
+
+        var msg = confirm("Are you sure you want to reject this petty cash?");
+
+        if (msg === true) {
+            $("#CashAdvanceAction").addClass("Submitloader");
+            var VoucherActionViewModel =
+            {
+
+                Comment: $("#txtComment").val(),
+                Id: @Model.PettyCash.Id,
+                ActionPerformed: 3
+            };
+            $(".error").remove();
+            $.post("/PettyCash/PettyCashAction",
+                {
+
+                    "pettyComplete": VoucherActionViewModel,
+                },
+                function (response) {
+
+                    var res = response.split("|");
+                    debugger;
+                    if ($.trim(res[0]) === "1") {
+                        alert(res[1]);
+                        var location = window.location.origin + "/PettyCash/PendingPettyCash";
+                        window.location.href = location;
+                        $("#CashAdvanceAction").removeClass("Submitloader");
+                    }
+
+                    else {
+                        $("#CashAdvanceAction").removeClass("Submitloader");
+                        //ErrorMessage("#FormCreateNewApplicationInfo", res[1].trim());
+                        alert(res[1]);
+                        var location = window.location.origin + "/PettyCash/PendingPettyCash";
+                        window.location.href = location;
+                        $("#CashAdvanceAction").removeClass("Submitloader");
+                    }
+                });
+
+        }
+    });
+
+    $("#btnEditAll").on('click', function (event) {
+        event.preventDefault();
+
+        var location = window.location.origin + "/PettyCash/EditPettyCash/@Model.PettyCash.Id";
+        $("#CashAdvanceAction").addClass("Submitloader");
+                window.location.href = location;
+                $("#AppDiv").removeClass("Submitloader");
+
+    });
+    $("#btnViewFile").on('click', function (event) {
+        event.preventDefault();
+
+        var location = window.location.origin + "/PettyCash/GetPettyCashFiles/@Model.PettyCash.Id";
+                window.location.href = location;
+
+    });
+
+    </script>

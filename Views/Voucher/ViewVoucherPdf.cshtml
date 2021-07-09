@@ -115,7 +115,9 @@
                         </tr>
                     </thead>
                     @{ var i = 0; }
-                    <tbody>
+                <tbody>
+                    @if (Model.Voucher.Currency == Currency.USD)
+                    {
                         @foreach (var t in Model.CashBooks)
                         {
                             i++;
@@ -124,26 +126,44 @@
                                 <td style="border: 1px solid black;">@i</td>
                                 <td style="border: 1px solid black;">@t.Particular</td>
                                 <td style="border: 1px solid black;"><small>@t.Description</small></td>
-                                <td style="border: 1px solid black;">&#8358;@String.Format("{0:n0}", @t.Amount)</td>
-                                <td style="border: 1px solid black;">&#8358;@String.Format("{0:n0}", @t.Amount)</td>
+                                <td style="border: 1px solid black;">&#36;@String.Format("{0:n}", @t.Amount)</td>
+                                <td style="border: 1px solid black;">&#36;@String.Format("{0:n}", @t.Amount)</td>
 
                             </tr>
                         }
-                        @*<tr style="font-size:large;">
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td>Home Currency Total</td>
-                                <td>@Model.Voucher.TotalAmount</td>
-                            </tr>*@
                         <tr style="font-size:medium;">
                             <td style="border: 1px solid black;"></td>
                             <td style="border: 1px solid black;"></td>
                             <td style="border: 1px solid black;"></td>
                             <td style="border: 1px solid black;">Total Amount</td>
-                            <td style="border: 1px solid black;">&#8358;@String.Format("{0:n0}", @Model.Voucher.TotalAmount)</td>
+                            <td style="border: 1px solid black;">&#36;@String.Format("{0:n}", @Model.Voucher.TotalAmount)</td>
                         </tr>
-                    </tbody>
+                    }
+                    else
+                    {
+                        @foreach (var t in Model.CashBooks)
+                        {
+                            i++;
+
+                            <tr style="font-size:medium;">
+                                <td style="border: 1px solid black;">@i</td>
+                                <td style="border: 1px solid black;">@t.Particular</td>
+                                <td style="border: 1px solid black;"><small>@t.Description</small></td>
+                                <td style="border: 1px solid black;">&#8358;@String.Format("{0:n}", @t.Amount)</td>
+                                <td style="border: 1px solid black;">&#8358;@String.Format("{0:n}", @t.Amount)</td>
+
+                            </tr>
+                        }
+                        <tr style="font-size:medium;">
+                            <td style="border: 1px solid black;"></td>
+                            <td style="border: 1px solid black;"></td>
+                            <td style="border: 1px solid black;"></td>
+                            <td style="border: 1px solid black;">Total Amount</td>
+                            <td style="border: 1px solid black;">&#8358;@String.Format("{0:n}", @Model.Voucher.TotalAmount)</td>
+                        </tr>
+                    }
+
+                </tbody>
                 </table>
                 <br>
                 <b>Total in words</b>

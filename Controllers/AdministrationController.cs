@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using VoucherAutomationSystem.Data;
@@ -18,12 +21,83 @@ namespace VoucherAutomationSystem.Controllers
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly AppDbContext context;
-        public AdministrationController(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, AppDbContext context)
+        private readonly IHostingEnvironment hostingEnvironment;
+        public AdministrationController(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, AppDbContext context, IHostingEnvironment hostingEnvironment)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.context = context;
+            this.hostingEnvironment = hostingEnvironment;
         }
+
+        [HttpGet]
+        public IActionResult UserToEdit()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UserToEdit(EditViewModel model)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
+            if (user == null)
+            {
+                return RedirectToAction("UserToEdit");
+            }
+            return RedirectToAction("EditUser", new { id = user.Id });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUser(int Id)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == Id);
+            var dept = await context.Departments.ToListAsync();
+            return View(new EditViewModel {User = user, Dept = dept });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUser(EditUserViewModel model)
+        {
+            string result = "";
+            var user = await context.Users.FirstOrDefaultAsync(x => x.Id == model.Id);
+
+            if (model.Photo != null)
+            {
+                string imageUrl = SavePhoto(model.Photo);
+                user.SignatureImage = imageUrl;
+            }
+            user.Email = model.Email;
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.DeptId = model.DeptId;
+            user.RoleLead = model.RoleLead;
+            var res = await userManager.UpdateAsync(user);
+            await context.SaveChangesAsync();
+            if (res.Succeeded)
+            {
+                result = "1 | Account updated successfully.";
+            }
+            else
+            {
+                result = "0 | Account updating failed.";
+            }
+
+            return Json(result);
+        }
+
+        private string SavePhoto(IFormFile photo)
+        {
+            string uploadsFolder = Path.Combine(hostingEnvironment.WebRootPath, "images");
+            var uniqueFileName = Guid.NewGuid().ToString() + "_" + photo.FileName;
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                photo.CopyTo(fileStream);
+            }
+            return uniqueFileName;
+        }
+
         [HttpGet]
         public IActionResult CreateRole()
         {
@@ -99,6 +173,14 @@ namespace VoucherAutomationSystem.Controllers
             {
 
                 user.IsActive = false;
+                user.DeptId = 0;
+                user.RoleLead = false;
+                var roles = await userManager.GetRolesAsync(user);
+                foreach (var role in roles)
+                {
+                    await userManager.RemoveFromRoleAsync(user, role);
+                }
+                
                 await userManager.UpdateAsync(user);
                 return RedirectToAction("ListUsers");
             }
@@ -287,7 +369,64 @@ namespace VoucherAutomationSystem.Controllers
             else
                 return Json("2|Error creating Particular.");
         }
-        
+
+        public async Task<IActionResult> CreateBank()
+        {
+            var bank = await context.Banks.ToListAsync();
+            return View(new CreateBankViewModel { bank = bank.OrderBy(x => x.Id).ToList() });
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateBank(CreateBankViewModel banks)
+        {
+            if (banks.BankName != null)
+            {
+                var bank = new Bank
+                {
+                    BankId = banks.BankId,
+                    Name = banks.BankName
+                };
+                await context.AddAsync(bank);
+                await context.SaveChangesAsync();
+
+                return Json("1|Bank Created successfully!");
+
+            }
+            else
+                return Json("2|Error creating Bank.");
+        }
+
+        public async Task<IActionResult> CreateDepartment()
+        {
+            var departments = await context.Departments.ToListAsync();
+            return View(new CreateDepartmentViewModel { Departments = departments.OrderBy(x => x.ID).ToList() });
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateDepartment(CreateDepartmentViewModel departments)
+        {
+            if (departments.DepartmentName != null)
+            {
+                var department = new Department
+                {
+                    Name = departments.DepartmentName
+                };
+                await context.AddAsync(department);
+                await context.SaveChangesAsync();
+
+                return Json("1|Department Created successfully!");
+
+            }
+            else
+                return Json("2|Error creating Department.");
+        }
+
+        public async Task<IActionResult> DeleteDepartment(int Id)
+        {
+            var department = await context.Departments.FindAsync(Id);
+            context.Departments.Remove(department);
+            await context.SaveChangesAsync();
+            return RedirectToAction("CreateDepartment");
+        }
+
         public async Task<IActionResult> DeleteParticular(int Id)
         {
             var particular = await context.Particulars.FindAsync(Id);

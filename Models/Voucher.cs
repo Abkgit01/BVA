@@ -29,7 +29,8 @@ namespace VoucherAutomationSystem.Models
         [ForeignKey(nameof(Role))]
         public string CurrentLevelRoleName { get; set; }
         public ApplicationRole Role { get; set; }
-        public int? TotalAmount { get; set; }
+        //public int? TotalAmount { get; set; }
+        public decimal? TotalAmount { get; set; }
         public string PhoneNo { get; set; }
         public string Address { get; set; }
         public string RoleCreator { get; set; }

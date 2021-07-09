@@ -9,6 +9,14 @@
     <div>
 
         <br />
+        @if ((User.IsInRole("Approval") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2")))
+        {
+            <div style="text-align:right">
+                <a class="btn btn-primary btn-sm" href="/Voucher/VoucherActionOnAll/2" onclick="return confirm('Are you sure you want to approve all?')"><b>Approve All</b></a>
+            </div>
+            <br />
+        }
+
         <table class="display table table-striped table-bordered" id="VouchersTable" style="font-size:small">
             <thead>
                 <tr>
@@ -44,7 +52,14 @@
                         }
 
                         <td>@s.VoucherType</td>
-                        <td>&#8358;@String.Format("{0:n0}", @s.TotalAmount)</td>
+                        @if (s.Currency == Currency.USD)
+                        {
+                            <td>&#36;@String.Format("{0:n}", @s.TotalAmount)</td>
+                        }
+                        else
+                        {
+                            <td>&#8358;@String.Format("{0:n}", @s.TotalAmount)</td>
+                        }
                         <td>@s.DateCreated</td>
                         @*<td><button class="btn btn-sm btn-success" onclick="CustomerApproveSchedule('@generalClass.Encrypt(s.Schedule.SchduleId.ToString())')"><i class="fas fa-check-circle"> </i> Accept </button></td>*@
                         <td><a asp-controller="voucher" asp-action="voucheraction" asp-route-id="@s.Id"><i class="fa fa-eye"> </i> <b>View</b> </a></td>

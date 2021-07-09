@@ -1,0 +1,128 @@
+﻿@{
+
+    ViewBag.Title = "Add Files";
+}
+
+<div id="FormAddFiles" class="container CreateVoucher">
+    <div class="">
+        <h2 style="text-align:center; color : #092f89 ;">Add Files</h2>
+    </div>
+    <td class="row" id="FormCreateVoucher">
+        <form id="createVoucherForm" enctype="multipart/form-data" class="row create-form" style="width:80%">
+
+            <table class="table table-hover table-bordered" style="font-size:small">
+                @*class="table-responsive"*@
+
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+
+                <tbody id="AppendVouchers">
+                    <tr>
+
+                        <td>
+                            <label>Add File(s)</label>
+                            <input name="txtAddFiles[]" id="txtAddFiles[]" type="file" class="form-control form-control-sm" placeholder="Add File " value="" accept="image/jpeg,image/png,application/pdf,image/x-eps,application/msword,.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" multiple />
+                        </td>
+                        @*<td>
+                                <button class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
+                            </td>*@
+                    </tr>
+                </tbody>
+
+            </table>
+            <div style="text-align:center;">
+                <input class="btn btn-primary" type="submit" id="btnSaveLegacyApplication" @*class="btn btn-success"*@ value="Upload & Save" />
+                <button id="txtCancelButton" class="btn btn-secondary">Save</button>
+            </div>
+        </form>
+</div>
+
+<style>
+    body {
+        background: #DCDCDC;
+    }
+
+    .Submitloader {
+        position: relative;
+    }
+
+        .Submitloader::after {
+            background-color: rgba(0,0,0,0.4);
+            content: 'Submitting...';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+</style>
+
+<script>
+    $("#createVoucherForm").on('submit', function (event) {
+        console.log(event)
+        event.preventDefault();
+        var msg = confirm("Are you sure you want to create this Petty Cash?");
+
+        if (msg === true) {
+            $("#createVoucherForm").addClass("Submitloader");
+
+            debugger
+            var datas = [];
+
+            var fileUpload = document.getElementById('txtAddFiles[]');
+            var formData = new FormData()
+            formData.append('pettyCashId', @ViewContext.RouteData.Values["id"])
+            for (var i = 0; i < fileUpload.files.length; i++) {
+                formData.append("files", fileUpload.files[i])
+            }
+            $.ajax({
+                        type: "POST",
+                        url: "/PettyCash/Addfiles",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        async: false,
+                        success: function (response) {
+                            var res = response.split("|");
+                            debugger;
+                            if ($.trim(res[0]) === "1") {
+                                //SuccessMessage("#registerForm", "Registration created successfully...");
+                                alert(res[1]);
+                                var location = window.location.origin + "/voucher/dashboard";
+                                window.location.href = location;
+                                $("#AppDiv").removeClass("Submitloader");
+                            }
+                            else {
+                                $("#AppDiv").removeClass("Submitloader");
+                                alert(res[1]);
+                                var location = window.location.origin + "/voucher/dashboard";
+                                window.location.href = location;
+                                $("#AppDiv").removeClass("Submitloader");
+                            }
+                        }
+                    });
+        }
+        else {
+            $("#FormCreateVoucher").removeClass("Submitloader");
+        }
+    });
+
+    $("#txtCancelButton").on('click', function (event) {
+        event.preventDefault();
+        var msg = confirm("Are you sure you want to save this Petty Cash?");
+        if (msg === true) {
+            $("#FormAddFiles").addClass("Submitloader");
+            alert("Saved!");
+            var location = window.location.origin + "/Voucher/dashboard";
+            window.location.href = location;
+            $("#AppDiv").removeClass("Submitloader");
+        }
+    });
+</script>

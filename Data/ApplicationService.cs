@@ -39,6 +39,8 @@ namespace VoucherAutomationSystem.Data
             var role = await context.Roles.FindAsync(RoleId);
             if (role == null)
                 throw new Exception("Invalid user role.");
+            if (voucherViewModel.ExchangeRate == null || voucherViewModel.ExchangeRate == 0)
+                throw new Exception("Exchange rate cannot be equal to 0");
 
             if (role.Name != "AccountOfficer" && role.Name != "ChiefAccountant")
                 throw new Exception("User cannot create a product.");
@@ -68,7 +70,7 @@ namespace VoucherAutomationSystem.Data
             await context.SaveChangesAsync();
 
             // Add the CashBook
-            int totalAmount = 0;
+            decimal totalAmount = 0;
             foreach (var cashBook in cashBookViewModels)
             {
                 await context.AddAsync(new CashBook
@@ -80,7 +82,7 @@ namespace VoucherAutomationSystem.Data
                 });
                 totalAmount += cashBook.Amount;
             }
-
+            totalAmount *= Convert.ToDecimal(voucherViewModel.ExchangeRate);
 
             //Add the Creation action.
             context.Add(new Models.Action
@@ -121,14 +123,14 @@ namespace VoucherAutomationSystem.Data
                     var approvalVouchers = from vouch in context.ApprovalVouchers
                                 where vouch.IsActive == false
                                 select vouch;
-                    foreach (var approvalVouch in approvalVouchers)
-                    {
-                        var vouch = await context.Vouchers.FirstOrDefaultAsync(x => x.Id == approvalVouch.VoucherId);
-                        if (vouch.IsActive == true)
-                        {
-                            approvalVouch.IsActive = true;
-                        }
-                    }
+                    //foreach (var approvalVouch in approvalVouchers)
+                    //{
+                    //    var vouch = await context.Vouchers.FirstOrDefaultAsync(x => x.Id == approvalVouch.VoucherId);
+                    //    if (vouch.IsActive == true)
+                    //    {
+                    //        approvalVouch.IsActive = true;
+                    //    }
+                    //}
                     //int maxCount = int.MaxValue; int? chosenUserId = null;
                     //int maxCount = int.MaxValue;
                     //int? chosenUserId = null;
@@ -181,7 +183,8 @@ namespace VoucherAutomationSystem.Data
 
             if (voucher.IsActive == true)
                 throw new Exception("Action failed, voucher is active");
-
+            if (voucher.ExchangeRate == null || voucher.ExchangeRate == 0)
+                throw new Exception("Exchange rate cannot be equal to 0");
             var role = await context.Roles.FindAsync(RoleId);
             if (role == null)
                 throw new Exception("Invalid user role.");
@@ -197,7 +200,7 @@ namespace VoucherAutomationSystem.Data
                 context.CashBooks.Remove(cashBook);
             }
             // Add the CashBook
-            int totalAmount = 0;
+            decimal totalAmount = 0;
             foreach (var cashBook in cashBooks)
             {
                 await context.AddAsync(new CashBook
@@ -221,6 +224,7 @@ namespace VoucherAutomationSystem.Data
                 Comment = comment
             });
             voucher.DateUpdated = DateTime.Now;
+            totalAmount *= Convert.ToDecimal(voucher.ExchangeRate);
             voucher.TotalAmount = totalAmount;
             context.Update(voucher);
             //update the CurrentLevelRole to the Next role if available
@@ -290,17 +294,13 @@ namespace VoucherAutomationSystem.Data
         }
         public async Task<IEnumerable<Voucher>> GetAllVouchers(string RoleName)
         {
-            if (RoleName == "Authorizer1" || RoleName == "Authorizer2" || RoleName == "ChiefAccountant")
+            if (RoleName == "Authorizer1" || RoleName == "Authorizer2" || RoleName == "ChiefAccountant" || RoleName == "AccountOfficer")
             {
                 return await context.Vouchers.ToListAsync();
             }
             else if (RoleName == "Approval")
             {
                 return await context.Vouchers.Where(x =>  x.TotalAmount <= 50000).ToListAsync();
-            }
-            else if (RoleName == "AccountOfficer")
-            {
-                return await context.Vouchers.Where(x => x.RoleCreator == "AccountOfficer" || x.TotalAmount <= 50000).ToListAsync();
             }
             else
             {
@@ -311,17 +311,13 @@ namespace VoucherAutomationSystem.Data
         
         public async Task<IEnumerable<Voucher>> GetActiveVouchers(string RoleName)
         {
-            if (RoleName == "Authorizer1" || RoleName == "Authorizer2" || RoleName == "ChiefAccountant")
+            if (RoleName == "Authorizer1" || RoleName == "Authorizer2" || RoleName == "ChiefAccountant" || RoleName == "AccountOfficer")
             {
                 return await context.Vouchers.Where(x => x.IsActive == true ).ToListAsync();
             }
             else if ( RoleName == "Approval")
             {
                 return await context.Vouchers.Where(x => x.IsActive == true && x.TotalAmount <= 50000).ToListAsync();
-            }
-            else if (RoleName == "AccountOfficer")
-            {
-                return await context.Vouchers.Where(x => x.IsActive == true && (x.TotalAmount <= 50000 || x.RoleCreator == "AccountOfficer")).ToListAsync();
             }
             else
             {
@@ -334,31 +330,27 @@ namespace VoucherAutomationSystem.Data
             var role = await context.Roles.FindAsync(RoleId);
             if (role == null)
                 throw new Exception("Invalid user role.");
-            if (role.Name != "ChiefAccountant" && role.Name != "AccountOfficer")
+            if (role.Name != "ChiefAccountant" && role.Name != "AccountOfficer" && role.Name != "Authorizer1" && role.Name != "Authorizer2")
                 throw new Exception("Invalid user role.");
-            if (role.Name == "AccountOfficer")
-            {
-                return await context.Vouchers.Where(x => x.IsActive == false && (x.TotalAmount <= 50000 || x.RoleCreator == "AccountOfficer")).ToListAsync();
-            }
-            else
-            {
-                return await context.Vouchers.Where(x => x.IsActive == false).ToListAsync();
-            }
-            
+            return await context.Vouchers.Where(x => x.IsActive == false).ToListAsync();
+
         }
 
         public async Task<Voucher> GetVoucher(int Id, string RoleName)
         {
             var voucher = await context.Vouchers.FindAsync(Id);
+
             if (RoleName == "Authorizer1" || RoleName == "Authorizer2" || RoleName == "ChiefAccountant")
             {
+                voucher.TotalAmount /= Convert.ToDecimal(voucher.ExchangeRate);
                 return voucher;
             }
             else if (RoleName == "Approval")
             {
                 if (voucher.TotalAmount <= 50000)
                 {
-                    return await context.Vouchers.FindAsync(Id);
+                    voucher.TotalAmount /= Convert.ToDecimal(voucher.ExchangeRate);
+                    return voucher;
                 }
                 else
                 {
@@ -369,7 +361,8 @@ namespace VoucherAutomationSystem.Data
             {
                 if (voucher.RoleCreator == "AccountOfficer" || voucher.TotalAmount <= 50000)
                 {
-                    return await context.Vouchers.FindAsync(Id);
+                    voucher.TotalAmount /= Convert.ToDecimal(voucher.ExchangeRate);
+                    return voucher;
                 }
                 else
                 {

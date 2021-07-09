@@ -26,21 +26,29 @@
 
                     var VoucherId = s.Id.ToString("D3");
 
-                    <tr>
-                        @if (s.VoucherType == VoucherType.Payment)
-                        {
-                            <td><a href="/Voucher/VoucherAction/@s.Id">PAY@{@VoucherId}</a></td>
-    }
-    else
-    {
-                            <td><a href="/Voucher/VoucherAction/@s.Id">REC@{@VoucherId}</a></td>
-                        }
-                        <td>@s.Payee</td>
-                        <td>@s.VoucherType</td>
-                        <td>&#8358;@String.Format("{0:n0}", @s.TotalAmount)</td>
-                        <td>@s.DateCreated</td>
-                        <td><a asp-controller="voucher" asp-action="viewvoucher" asp-route-id="@s.Id"><i class="fa fa-eye"> </i> <b>View</b> </a></td>
-                    </tr>
+                <tr>
+                    @if (s.VoucherType == VoucherType.Payment)
+                    {
+                        <td><a href="/Voucher/VoucherAction/@s.Id">PAY@{@VoucherId}</a></td>
+                    }
+                    else
+                    {
+                        <td><a href="/Voucher/VoucherAction/@s.Id">REC@{@VoucherId}</a></td>
+                    }
+                    <td>@s.Payee</td>
+                    <td>@s.VoucherType</td>
+                    @if (s.Currency == Currency.USD)
+                    {
+                        <td>&#36;@String.Format("{0:n}", @s.TotalAmount)</td>
+                    }
+                    else
+                    {
+                        <td>&#8358;@String.Format("{0:n}", @s.TotalAmount)</td>
+                    }
+
+                    <td>@s.DateCreated</td>
+                    <td><a asp-controller="voucher" asp-action="viewvoucher" asp-route-id="@s.Id"><i class="fa fa-eye"> </i> <b>View</b> </a></td>
+                </tr>
                 }
             </tbody>
         </table>

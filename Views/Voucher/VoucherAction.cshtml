@@ -147,20 +147,38 @@
                             </thead>
 
                             <tbody>
-                                @foreach (var t in Model.CashBooks)
+                                @if (Model.Voucher.Currency == Currency.USD)
                                 {
+                                    @foreach (var t in Model.CashBooks)
+                                    {
+                                        <tr>
+                                            <td>@t.Particular</td>
+                                            <td><small>@t.Description</small></td>
+                                            <td>&#36;@String.Format("{0:n}", @t.Amount)</td>
+                                        </tr>
+                                    }
                                     <tr>
-                                        <td>@t.Particular</td>
-                                        <td><small>@t.Description</small></td>
-                                        <td>&#8358;@String.Format("{0:n0}", @t.Amount)</td>
+                                        <td></td>
+                                        <td>Total Amount :</td>
+                                        <td> <b>&#36;@String.Format("{0:n}", @Model.Voucher.TotalAmount)</b> </td>
                                     </tr>
                                 }
-                                <tr>
-                                    <td></td>
-                                    <td>Total Amount :</td>
-                                    <td> <b>&#8358;@String.Format("{0:n0}", @Model.Voucher.TotalAmount)</b> </td>
-                                </tr>
-
+                                else
+                                {
+                                    @foreach (var t in Model.CashBooks)
+                                    {
+                                        <tr>
+                                            <td>@t.Particular</td>
+                                            <td><small>@t.Description</small></td>
+                                            <td>&#8358;@String.Format("{0:n}", @t.Amount)</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td></td>
+                                        <td>Total Amount :</td>
+                                        <td> <b>&#8358;@String.Format("{0:n}", @Model.Voucher.TotalAmount)</b> </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
 

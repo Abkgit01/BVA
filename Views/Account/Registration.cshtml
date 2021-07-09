@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ApplicationRole>
+﻿@model RegViewModel
 @{
 
     ViewBag.Title = "Registration Page";
@@ -39,6 +39,10 @@
                             <div class="form-group">
                                 <input id="txtConfirmPassword" type="password" minlength="8" class="form-control" placeholder="Confirm Password *" value="" required />
                             </div>
+                            <div class="form-group form-inline">
+                                <input type="checkbox" class="form-check-input" value="" id="txtLead">
+                                <label class="form-check-label" for="txtLead">Dept Lead</label>
+                            </div>
                             <input id="btnsubmit" type="submit" class="btnRegister" value="Register" />
                         </div>
                         <div class="col-md-6">
@@ -49,9 +53,18 @@
                             <div class="form-group">
                                 <select id="txtRoles" required class="form-control">
                                     <option>Select Roles</option>
-                                    @foreach (var b in Model)
+                                    @foreach (var b in Model.Roles)
                                     {
-                                    <option value="@b.Name">@b.Name</option>
+                                        <option value="@b.Name">@b.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <select id="txtDepts" required class="form-control">
+                                    <option>Select Department</option>
+                                    @foreach (var b in Model.Depts)
+                                    {
+                                        <option value="@b.ID">@b.Name</option>
                                     }
                                 </select>
                             </div>
@@ -93,6 +106,8 @@
             data.append("Password", $("#txtPassword").val());
             data.append("Email", $("#txtEmail").val());
             data.append("Role", $("#txtRoles").val());
+            data.append("DeptId", $("#txtDepts").val());
+            data.append("RoleLead", $("#txtLead").prop("checked"));
             if (msg === true) {
 
                 var password = $("#txtPassword").val();

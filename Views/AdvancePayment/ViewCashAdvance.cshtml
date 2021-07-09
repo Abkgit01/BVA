@@ -1,0 +1,212 @@
+﻿@model CashAdvancePaymentsViewModel
+@{
+    Layout = null;
+}
+@{
+
+    ViewBag.Title = "View Cash Advance";
+}
+
+
+
+<div class="container pt-3 pb-3" style="height:auto">
+    <div class="">
+        <h1 style="text-align:center; color : #191616 ;">
+            <img src="~/images/logo2-b-192x43.png" />
+        </h1>
+    </div>
+
+    <form id="createVoucherForm">
+        <div class="row">
+            <div class="column" style="font-size:medium">
+
+                <div style="border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    @{
+                        var cashAdvanceId = @Model.cashAdvance.Id.ToString("D3");
+                    }
+                    <div class="form-group ">
+                        <label>ID</label> : @cashAdvanceId
+                    </div>
+                    <div class="form-group ">
+                        <label>Name</label> : @Model.cashAdvance.Name
+                    </div>
+                    <div class="form-group ">
+                        <label>Department</label> : @Model.cashAdvance.Dept.Name
+                    </div>
+                    <div class="form-group ">
+                        <label>Date Created</label> : @Model.cashAdvance.DateCreated
+                    </div>
+                </div>
+                <br />
+
+                @*<div style="border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    
+                </div>
+                <br />*@
+            </div>
+
+            <div class="column" style="font-size:medium">
+                <div style="position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px;">
+                    <div class="form-group">
+                        <label>Currency</label> : @Model.cashAdvance.Currency
+                    </div>
+                    <div class="form-group ">
+                        <label>Exchange Rate</label> : @Model.cashAdvance.ExchangeRate
+                    </div>
+                    <div class="form-group ">
+                        <label>Total Amount</label> : @Model.cashAdvance.TotalAmount
+                    </div>
+                    <br/>
+                </div>
+                <br />
+            </div>
+
+            <div style="padding-left:10px;padding-right:10px; width:100%; position:relative">
+
+                <br>
+                <b>Description</b>
+                <div style="width:95%; position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:5px; padding-bottom:10px;">
+                    @Model.cashAdvance.Description
+                </div>
+                <br />
+
+                <table class="table table-hover table-bordered" style="width: 97.5%; font-size:medium;border-bottom: 1pt solid #ff000d;">
+                    @*class="table-responsive"*@
+
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Cashbook Amount</th>
+
+                        </tr>
+                    </thead>
+                    @{ var i = 0; }
+                    <tbody>
+                        @if (Model.cashAdvance.Currency == Currency.USD)
+                        {
+                            @foreach (var t in Model.cashAdvancePayments)
+                            {
+                                i++;
+
+                                <tr style="font-size:medium;">
+                                    <td>@i</td>
+                                    <td><small>@t.Description</small></td>
+                                    <td>&#36;@String.Format("{0:n}", @t.Amount)</td>
+                                    <td>&#36;@String.Format("{0:n}", @t.Amount)</td>
+
+                                </tr>
+                            }
+                            <tr style="font-size:medium;">
+                                <td></td>
+                                <td></td>
+                                <td>Total</td>
+                                <td>&#36;@String.Format("{0:n}", @Model.cashAdvance.TotalAmount)</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var t in Model.cashAdvancePayments)
+                            {
+                                i++;
+
+                                <tr style="font-size:medium;">
+                                    <td>@i</td>
+                                    <td><small>@t.Description</small></td>
+                                    <td>&#8358;@String.Format("{0:n}", @t.Amount)</td>
+                                    <td>&#8358;@String.Format("{0:n}", @t.Amount)</td>
+
+                                </tr>
+                            }
+                            <tr style="font-size:medium;">
+                                <td></td>
+                                <td></td>
+                                <td>Total</td>
+                                <td>&#8358;@String.Format("{0:n}", @Model.cashAdvance.TotalAmount)</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+                <br>
+                <b>Total in words</b>
+                <div style="width:95%; position:relative;border:1px solid #000; padding-left:10px; padding-right:10px; padding-top:5px; padding-bottom:10px;">
+                    @Model.NumberInWords Naira.
+                </div>
+                <div style="padding-top:30px">
+                    <table class="pb-0" style="border-collapse: collapse; font-size: medium; width: 97.5%">
+
+
+                        <tbody>
+                            @foreach (var k in Model.cashAdvanceActions)
+                            {
+                                <tr class="border-bottom" style=" ">
+                                    @if (@k.ActionPerformed == ActionPerformed.Edited)
+                                    {
+                                        <td style="font-size:10px; margin: 0; padding: 0;">Created</td>
+                                    }
+                                    else
+                                    {
+                                        <td style="font-size:10px; margin: 0; padding: 0;">@k.ActionPerformed</td>
+                                    }
+                                    <td style="margin-bottom: 0; padding-bottom: 0;">@k.User.FirstName</td>
+                                    <td style="margin-bottom: 0; padding-bottom: 0;">@k.User.LastName</td>
+                                    <td style="margin-bottom: 0; padding-bottom: 0;"><img src="~/images/@k.User.SignatureImage" style="height: 35px; width:35px" /></td>
+                                    <td style="margin-bottom: 0; padding-bottom: 0;">@k.DateUpdated</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+    <br />
+
+    @foreach (var file in Model.cashAdvanceFiles)
+    {
+        <br />
+        <embed src="~/images/@file.Name" style="display: flex;width:1000px;height:800px; align-items: center; flex-wrap: wrap;" />
+        <br />
+    }
+    <br />
+    <div style="text-align:center">
+        <a class="btn btn-sm btn-success" onclick="goBack()"> Previous page </a>
+        @*<a class="btn btn-sm btn-secondary" asp-controller="Voucher" asp-action="ViewVoucherPdf" asp-route-id="@Model.Voucher.Id" target="_blank">  <b>Convert to pdf</b> </a>*@
+        <a href="/advancepayment/advancepaymentaction/@Model.cashAdvance.Id" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i>Action History </a>
+    </div>
+
+</div>
+<link href="~/lib/bootstrap/css/bootstrap.css" rel="stylesheet" />
+<link href="~/lib/bootstrap/css/bootstrap-grid.css" rel="stylesheet" />
+<link href="~/lib/bootstrap/css/bootstrap-reboot.css" rel="stylesheet" />
+<style>
+    table, th, td {
+        border-collapse: collapse;
+        padding: 10px;
+    }
+
+    .column {
+        float: left;
+        width: 47.5%;
+        padding: 10px;
+    }
+
+    .row::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+</style>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+<style>
+    tr.border-bottom td {
+        border-bottom: dotted 2px #000;
+    }
+</style>

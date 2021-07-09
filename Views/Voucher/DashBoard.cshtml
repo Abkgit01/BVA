@@ -1,4 +1,5 @@
 ﻿@model DashBoardViewModel
+
 <!-- Styles -->
 
 <style>
@@ -243,59 +244,120 @@
 </script>
 <div style="height:230px" id="BackImage">
     <div class="row">
+        @if ((User.IsInRole("ChiefAccountant") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2")))
+        {
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    <a href="/voucher/viewallvouchers"><b style="opacity:1.5; color:white">@Model.TotalVouchers</b></a>
+                </div>
+                <div class="DashCount">
+                    All Vouchers
+                </div>
 
-        <div  class="col-sm-3">
-            <div class="FirstDashCount">
-                <a href="/voucher/viewallvouchers"><b style="opacity:1.5; color:white">@Model.TotalVouchers</b></a>
-            </div>
-            <div class="DashCount">
-                All Vouchers
             </div>
 
-        </div>
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    <a href="/AdvancePayment/AllAdvancePayment"><b style="opacity:1.5; color:white">@Model.TotalCashAdvance</b></a>
+                    
+                </div>
+                <div class="DashCount">
+                    All Cash Advance
+                </div>
+            </div>
 
-        <div class="col-sm-3">
-            <div class="FirstDashCount">
-                @*<a href="/voucher/viewinactivevouchers"><b style="opacity:1.5; color:white">@Model.InactiveCount</b></a>*@
-                <b style="opacity:1.5; color:white">@Model.InactiveCount</b>
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    <a href="/RetirementPayment/AllRetirementPayment"><b style="opacity:1.5; color:white">@Model.TotalRetirementCash</b></a>
+                </div>
+                <div class="DashCount">
+                    All Cash Retirement
+                </div>
             </div>
-            <div class="DashCount">
-                On Processing
-            </div>
-        </div>
 
-        <div class="col-sm-3">
-            <div class="FirstDashCount">
-                <a href="/voucher/viewactivevouchers"><b style="opacity:1.5; color:white">@Model.ActiveCount</b></a>
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    <a href="/PettyCash/AllPettyCash"><b style="opacity:1.5; color:white">@Model.TotalPettyCash</b></a>
+                </div>
+                <div class="DashCount">
+                    All Petty Cash
+                </div>
             </div>
-            <div class="DashCount">
-                Total Approval(s)
-            </div>
-        </div>
+        }
+        else
+        {
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    <b style="opacity:1.5; color:white">@Model.TotalVouchers</b>
+                </div>
+                <div class="DashCount">
+                    All Vouchers
+                </div>
 
-        <div class="col-sm-3">
-            <div class="FirstDashCount">
-                <a href="/voucher/voucherspending"><b style="opacity:1.5; color:white">@Model.PendingCount</b></a>
             </div>
-            <div class="DashCount">
-                On my desk
+
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    @*<a href="/voucher/viewinactivevouchers"><b style="opacity:1.5; color:white">@Model.InactiveCount</b></a>*@
+                    <b style="opacity:1.5; color:white">@Model.TotalCashAdvance</b>
+                </div>
+                <div class="DashCount">
+                    All Cash Advance
+                </div>
             </div>
-        </div>
+
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    <b style="opacity:1.5; color:white">@Model.TotalRetirementCash</b>
+                </div>
+                <div class="DashCount">
+                    All Cash Retirement
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="FirstDashCount">
+                    <b style="opacity:1.5; color:white">@Model.TotalPettyCash</b>
+                </div>
+                <div class="DashCount">
+                    All Petty Cash
+                </div>
+            </div>
+        }
+        
     </div>
 </div>
 
 <div style="margin-left: 200px;">
-    <br /> 
+    <br />
+    @if (@Model.PendingCount == 0 && @Model.PettyCashCount == 0 && @Model.CashAdvanceCount == 0 && @Model.RetirementPaymentCount == 0)
+    {
+        <p>
+            <b class="text-danger"> You have no pending request on your desk. </b> <br />
+        </p>
+    }
     @if (@Model.PendingCount > 0)
     {
         <p>
             <b class="text-danger" style=""> You have <b>@Model.PendingCount</b> vouchers on your desk. Kindly go to <a href="/voucher/voucherspending"> my desk </a> and continue.</b> <br />
         </p>
     }
-    else
+    @if (@Model.PettyCashCount > 0)
     {
         <p>
-            <b class="text-danger"> You have no voucher on your desk. </b> <br />
+            <b class="text-danger" style=""> You have <b>@Model.PettyCashCount</b> petty cash on your desk. Kindly go to <a href="/pettycash/pendingpettycash"> my desk </a> and continue.</b> <br />
+        </p>
+    }
+    @if (@Model.CashAdvanceCount > 0)
+    {
+        <p>
+            <b class="text-danger" style=""> You have <b>@Model.CashAdvanceCount</b> cash advance on your desk. Kindly go to <a href="/advancepayment/pendingadvancepayment"> my desk </a> and continue.</b> <br />
+        </p>
+    }
+    @if (@Model.RetirementPaymentCount > 0)
+    {
+        <p>
+            <b class="text-danger" style=""> You have <b>@Model.RetirementPaymentCount</b> retirement payment on your desk. Kindly go to <a href="/retirementpayment/pendingretirementpayment"> my desk </a> and continue.</b> <br />
         </p>
     }
 </div>

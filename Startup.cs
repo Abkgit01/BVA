@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -37,7 +38,17 @@ namespace VoucherAutomationSystem
             .AddDefaultTokenProviders();
 
             services.AddScoped<IApplicationService, ApplicationService>();
-
+            services.AddScoped<IAdvancePaymentService, AdvancePaymentService>();
+            services.AddScoped<IPettyCashService, PettyCashService>();
+            services.AddScoped<IRetirementPaymentService, RetirementPaymentService>();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                //options.LoginPath = "/auth/login";
+                //options.AccessDeniedPath = "/auth/accessdenied";
+                options.Cookie.IsEssential = true;
+                options.SlidingExpiration = true; // here 1
+                options.ExpireTimeSpan = TimeSpan.FromSeconds(10);// here 2
+            });
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireNonAlphanumeric = false;

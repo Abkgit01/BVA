@@ -8,6 +8,7 @@ namespace VoucherAutomationSystem.ViewModels
 {
     public class RegisterViewModel
     {
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
@@ -16,5 +17,7 @@ namespace VoucherAutomationSystem.ViewModels
         public IFormFile Photo { get; set; }
         public string Password { get; set; }
         public string Role { get; set; }
+        public int DeptId { get; set; }
+        public bool RoleLead { get; set; }
     }
 }
