@@ -271,7 +271,7 @@ namespace VoucherAutomationSystem.Controllers
             var roles = await userManager.GetRolesAsync(user);
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
 
-            if (role.Name == "ChiefAccountant"|| role.Name == "Authorizer1" || role.Name == "Authorizer2" || role.Name == "AccountOfficer" )
+            if (role.Name == "ChiefAccountant"|| role.Name == "Authorizer1" || role.Name == "Authorizer2" || role.Name == "AccountOfficer" || role.Name == "Approval" )
             {
                 res = await pettyService.GetAllPettyCash(user.Id);
             }
@@ -303,6 +303,8 @@ namespace VoucherAutomationSystem.Controllers
                         DateCreated = petty.DateCreated,
                         CurrentStage = petty.CurrentStage
                     });
+
+
                 }
                 else
                 {
@@ -488,43 +490,47 @@ namespace VoucherAutomationSystem.Controllers
 
         public async Task<ActionResult> ViewPettyCash(int Id)
         {
+            List<PettyCashAction> ActionList = new List<PettyCashAction>();
+
             var user = await userManager.GetUserAsync(User);
             var roles = await userManager.GetRolesAsync(user);
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
             if (role != null)
             {
                 var pettyCash = await pettyService.GetPettyCash(Id, user.Id);
                 pettyCash.User = await context.Users.FindAsync(pettyCash.UserId);
-                if (pettyCash == null)
-                {
-                    return RedirectToAction("DashBoard", "Voucher");
-                }
+
                 var dept = await context.Departments.FirstOrDefaultAsync(x => x.ID == pettyCash.DeptId);
+
                 //cashAdvance.Dept = dept;
                 var actions = await pettyService.GetPettyCashActions(Id);
                 var pettyCashFiles = await pettyService.GetPettyCashFiles(Id);
                 pettyCash.Dept = dept;
-                //foreach (var pettyCashFile in pettyCashFiles)
-                //{
-                //    pettyCashFile.Petty.UserId = pettyCash.UserId;
-                //}
+
+                string numberInWords = NumberToWords.ConvertAmount(Convert.ToDouble(pettyCash.TotalAmount.Value));
+
                 foreach (var action in actions)
                 {
                     action.User = await userManager.FindByIdAsync(action.UserId.ToString());
                     //action.User = await userManager.Users.FirstOrDefaultAsync(u => u.UserId == action.Id);
                 }
-                List<PettyCashAction> ActionList = new List<PettyCashAction>();
+
+                if (pettyCash == null)
+                {
+                    return View("ViewPettyCash", new CompletePettyCashViewModel { PettyCash = pettyCash, pettyCashActions = ActionList.OrderBy(x => x.DateUpdated).ToList(), NumberInWords = numberInWords, pettyCashFiles = pettyCashFiles });
+
+                }
+
                 foreach (var action in actions.OrderByDescending(x => x.DateUpdated))
                 {
-
                     ActionList.Add(action);
                     if (action.ActionPerformed == ActionPerformed.Edited || action.ActionPerformed == ActionPerformed.Created)
                     {
                         break;
                     }
-
                 }
-                string numberInWords = NumberToWords.ConvertAmount(Convert.ToDouble(pettyCash.TotalAmount.Value));
+
                 foreach (var action in actions)
                 {
                     if (action.UserId == user.Id)
@@ -532,16 +538,18 @@ namespace VoucherAutomationSystem.Controllers
                         return View("ViewPettyCash", new CompletePettyCashViewModel { PettyCash = pettyCash, pettyCashActions = ActionList.OrderBy(x => x.DateUpdated).ToList(), NumberInWords = numberInWords, pettyCashFiles = pettyCashFiles });
                     }
                 }
+
                 if (await userManager.IsInRoleAsync(user, "AccountOfficer"))
                 {
                     return View("ViewPettyCash", new CompletePettyCashViewModel { PettyCash = pettyCash, pettyCashActions = ActionList.OrderBy(x => x.DateUpdated).ToList(), NumberInWords = numberInWords, pettyCashFiles = pettyCashFiles });
                 }
-                return RedirectToAction("DashBoard", "Voucher");
-                
-
             }
+
             return View();
         }
+
+
+
         [HttpGet]
         public async Task<string> SendMail(PettyCash pettyCash, List<ApplicationUser> users, string comment)
         {

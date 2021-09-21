@@ -380,7 +380,7 @@ namespace VoucherAutomationSystem.Controllers
             }
             var roles = await userManager.GetRolesAsync(user);
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
-            if (role.Name == "ChiefAccountant" || role.Name == "Authorizer1" || role.Name == "Authorizer2" || role.Name == "AccountOfficer")
+            if (role.Name == "ChiefAccountant" || role.Name == "Authorizer1" || role.Name == "Authorizer2" || role.Name == "AccountOfficer" || role.Name == "Approval")
             {
                 res = await retirementService.GetAllRetirementPayments(user.Id);
             }
