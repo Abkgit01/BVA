@@ -1,0 +1,177 @@
+﻿@model CashCompleteViewModel  
+@{
+
+    ViewBag.Title = "Edit Page";
+}
+
+<div class="container CreateVoucher">
+    <div class="">
+        <h1 style="text-align:center; color : #191616 ;">Edit Advance</h1>
+    </div>
+    <div class="row" id="FormCreateAdvance">
+        <form id="createAdvanceForm" class="row create-form">
+            <div class="col-md-6" style="font-size:small">
+                <div class="form-group ">
+                    <label>Name</label>
+                    <input id="txtName" type="text" class="form-control form-control-sm" placeholder="Account payee *" value="@Model.cashAdvance.Name" disabled />
+                </div>
+                <div class="form-group ">
+                    <label>Description</label>
+                    <textarea id="txtDescription" placeholder="Description" class="pb-cmnt-textarea form-control form-control-sm" required>@Model.cashAdvance.Description</textarea><br>
+                </div>
+                
+            </div>
+            <div class="col-md-6" style="font-size:small">
+
+                <div class="form-group ">
+                    <label>Department</label>
+                    <input id="txtDept" type="text" class="form-control form-control-sm" placeholder="Department " value="@Model.cashAdvance.Dept.Name" disabled/>
+                </div>
+                <div class="form-group ">
+                    <label>Currency</label>
+                    <select id="txtCurrency" class="form-control form-control-sm" asp-items="Html.GetEnumSelectList<Currency>()">
+                        <option value="">@Model.cashAdvance.Currency</option>
+                    </select>
+                </div>
+                <div class="form-group ">
+                    <label>Exchange Rate</label>
+                    <input id="txtExchangeRate" type="text" class="form-control form-control-sm" placeholder="Exchange rate " value="@Model.cashAdvance.ExchangeRate" />
+                </div>
+                <div class="form-group ">
+                    <label>Comment</label>
+                    <textarea id="txtComment" placeholder="Comment" class="pb-cmnt-textarea form-control form-control-sm" required></textarea><br>
+                </div>
+            </div>
+
+            <table class="table table-hover table-bordered" style="font-size:small">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody id="AppendVouchers">
+                    @foreach (var s in Model.cashAdvancePayment)
+                    {
+                        <tr>
+                            <td>
+                                <input type="text" required class="form-control form-control-sm form-inline" placeholder="Enter Description" value="@s.Description" id="txtDescriptionCB[]" name="txtDescriptionCB[]" />
+                            </td>
+
+                            <td>
+                                <input type="number" step="any" required class="form-control form-control-sm form-inline" placeholder="Enter Amount" value="@s.Amount" id="txtAmount[]" name="txtAmount[]" @*onkeyup="sum()"*@ />
+                            </td>
+                            <td>
+                                <a class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete?')" href="/AdvancePayment/DeletePayment/@s.Id"> <i class="fa fa-trash"> </i> </a>
+                            </td>
+
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div style="text-align:center;">
+
+                <input class="btn btn-primary" type="submit" id="btnSaveLegacyApplication" value="Update" />
+                <input type="reset" class="btn btn-secondary m-b-10 m-l-5">
+
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<style>
+    body {
+        background: #DCDCDC;
+    }
+</style>
+
+<script>
+    var Vouchers_i = 1;
+
+    function Add() {
+
+        Vouchers_i++;
+
+        var html = "<tr id='Remove" + Vouchers_i + "'><td><input type='text' required class='form-control form-control-sm form-inline' placeholder='Enter Description' id ='txtDescriptionCB[]' name='txtDescriptionCB[]' /> </td>";
+
+        //html += "<td><input type='text' required class='form-control form-control-sm form-inline' placeholder='Enter Description' id ='txtDescriptionCB[]' name='txtDescriptionCB[]' /></td >";
+
+        html += "<td><input type='number' step='any' required class='form-control form-control-sm form-inline' placeholder='Enter Amount' id='txtAmount[]' name='txtAmount[]' /></td >";
+
+        html += "<td> <button class='btn btn-danger btn-sm' onclick='RemoveVoucher();'> <i class='fa fa-trash'> </i> </button> </td> </tr >";
+
+        $("#AppendVouchers tr:last").after(html);
+    }
+
+
+    function RemoveVoucher() {
+        $("#Remove" + Vouchers_i).remove();
+        Vouchers_i--;
+    }
+
+
+</script>
+
+<script>
+    $("#createAdvanceForm").on('submit', function (event) {
+        console.log(event)
+        event.preventDefault();
+        var msg = confirm("Are you sure you want to update this Cash advance?");
+        //$("#FormCreateVoucher").addClass("Submitloader");
+        if (msg === true) {
+            $("#FormCreateAdvance").addClass("Submitloader");
+            var CashAdvance = {
+                Id : @Model.cashAdvance.Id,
+                Name: $("#txtName").val(),
+                DeptId: $("#txtDept").val(),
+                Description: $("#txtDescription").val(),
+                VoucherType: $("#txtVoucherType").val(),
+                Currency: $("#txtCurrency").val(),
+                ExchangeRate: $("#txtExchangeRate").val(),
+            };
+
+            var cashAdvanceCB = [];
+            var comment = $("#txtComment").val();
+
+            var Description = document.getElementsByName('txtDescriptionCB[]');
+            var Amount = document.getElementsByName('txtAmount[]');
+
+            for (var i = 0; i < Description.length; i++) {
+                cashAdvanceCB.push({
+                    "Description": Description[i].value.trim(),
+                    "Amount": Amount[i].value.trim(),
+                });
+
+            }
+
+            //console.log(VouchersCB);
+            //console.log(Vouchers);
+
+            debugger
+            $.post("/AdvancePayment/EditCashAdvance", { "cashAdvance": CashAdvance, "cashAdvancePayments": cashAdvanceCB, "comment" : comment }, function (response) {
+
+                var res = $.trim(response).split("|");
+
+                if (res[0] === "1") {
+                    alert(res[2]);
+                    var location = window.location.origin + "/AdvancePayment/AddFiles/" + res[1];
+                    window.location.href = location;
+                    $("#FormCreateAdvance").removeClass("Submitloader");
+                }
+                else {
+                    $("#FormCreateAdvance").removeClass("Submitloader");
+                    //ErrorMessage("#FormCreateVoucher", res[1]);
+                    alert(res[1]);
+                }
+            });
+        }
+        else {
+            $("#FormCreateAdvance").removeClass("Submitloader");
+        }
+    });
+</script>

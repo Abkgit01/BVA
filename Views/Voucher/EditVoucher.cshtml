@@ -77,7 +77,6 @@
 
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Particulars</th>
                         <th>Description</th>
                         <th>Amount</th>
@@ -90,9 +89,10 @@
                     @foreach (var s in Model.CashBooks)
                     {
                     <tr>
-                        <td>
+
+                        @*<td>
                             <input type="text" required class="form-control form-control-sm form-inline"  value="@s.Id" id="txtID[]" name="txtID[]" disabled/>
-                        </td>
+                        </td>*@
                         <td>
                             <select id="txtParticular[]" name="txtParticular[]" required" class="form-control form-control-sm form-inline" required>
                                 <option>@s.Particular</option>
@@ -108,11 +108,14 @@
                         </td>
 
                         <td>
-                            <input type="number" required class="form-control form-control-sm form-inline" placeholder="Enter Amount" value="@s.Amount" id="txtAmount[]" name="txtAmount[]" @*onkeyup="sum()"*@ />
+                            <input type="number" step="any" required class="form-control form-control-sm form-inline" placeholder="Enter Amount" value="@s.Amount" id="txtAmount[]" name="txtAmount[]" @*onkeyup="sum()"*@ />
                         </td>
                         <td>
-                            @*<button class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>*@
                             <a class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete?')" href="/voucher/DeleteCashbook/@s.Id"> <i class="fa fa-trash"> </i> </a>
+                        </td>
+
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
                         </td>
                     </tr>
                     }
@@ -155,7 +158,7 @@
 
         html += "<td><input type='text' required class='form-control form-control-sm form-inline' placeholder='Enter Description' id ='txtDescriptionCB[]' name='txtDescriptionCB[]' /></td >";
 
-        html += "<td><input type='number' required class='form-control form-control-sm form-inline' placeholder='Enter Amount' id='txtAmount[]' name='txtAmount[]' /></td >";
+        html += "<td><input type='number' step='any' required class='form-control form-control-sm form-inline' placeholder='Enter Amount' id='txtAmount[]' name='txtAmount[]' /></td >";
 
         html += "<td> <button class='btn btn-danger btn-sm' onclick='RemoveVoucher();'> <i class='fa fa-trash'> </i> </button> </td> </tr >";
 
@@ -214,18 +217,18 @@
             var VouchersCB = [];
             var Comment = { comment : $("#txtComment").val()}
                 
-            var Id = document.getElementsByName('txtID[]');
+            //var Id = document.getElementsByName('txtID[]');
             var Particular = document.getElementsByName('txtParticular[]');
             var Description = document.getElementsByName('txtDescriptionCB[]');
             var Amount = document.getElementsByName('txtAmount[]');
           
             for (var i = 0; i < Particular.length; i++) {
                 VouchersCB.push({
-                    "Id": Id[i].value.trim(),
+                    //"Id": Id[i].value.trim(),
                     "Particular": Particular[i].value.trim(),
                     "Description": Description[i].value.trim(),
                     "Amount": Amount[i].value.trim(),
-                    "VoucherId" : @Model.Voucher.Id,
+                    @*"VoucherId" : @Model.Voucher.Id,*@
                 });
 
             }

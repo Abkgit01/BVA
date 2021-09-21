@@ -1,0 +1,37 @@
+﻿@model AdvanceFilesViewModel
+@{
+
+    ViewBag.Title = "Cash Advance Files";
+}
+
+<div class="container pt-3 pb-3" style="height:auto">
+    <br />
+    @if (Model.CashAdvanceFiles == null)
+    {
+        <h1>No file availaible!</h1>
+    }
+    @foreach (var file in Model.CashAdvanceFiles)
+    {
+        <br />
+        <embed src="~/images/@file.Name" style="display: flex; align-items: center; flex-wrap: wrap; width:1000px;height:800px" />
+        <br />
+
+        @if (Model.UserId == file.CashAdvance.UserId && file.CashAdvance.IsApproved == false)
+        {
+            //if ((file.Voucher.CurrentLevelRoleName == "ChiefAccountant" || file.Voucher.CurrentLevelRoleName == "Authorizer1" || file.Voucher.CurrentLevelRoleName == "Approval") && file.Voucher.RoleCreator == "ChiefAccountant")
+            
+                <a href="/AdvancePayment/DeleteAdvancePaymentFile/@file.Id" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete?')"> <i class="fa fa-trash"> </i> Delete file </a>
+                <br />
+            
+
+        }
+        
+    }
+    <br />
+    <a class="btn btn-sm btn-success" onclick="goBack()">  </i> Previous page </a>
+</div>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>

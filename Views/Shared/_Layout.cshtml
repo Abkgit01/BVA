@@ -21,7 +21,7 @@
     <!------ Include the above in your HEAD tag ---------->
 </head>
 <body>
-    
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark  box-shadow ">
             <div class="container">
@@ -45,7 +45,7 @@
 
                     @if (signInManager.IsSignedIn(User))
                     {
-                        if ((User.IsInRole("ChiefAccountant") || User.IsInRole("AccountOfficer")))
+                        if ((User.IsInRole("ChiefAccountant") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2")|| User.IsInRole("AccountOfficer")))
                         {
                             <div class="dropdown">
                                 <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -60,7 +60,7 @@
                                 </div>
                             </div>
                         }
-                        else if ((User.IsInRole("Approval") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2")))
+                        else if ((User.IsInRole("Approval") ))
                         {
                             <div class="dropdown">
                                 <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -73,8 +73,112 @@
                                 </div>
                             </div>
                         }
+                        
+                    }
+
+                    @if (signInManager.IsSignedIn(User))
+                    {
+                        if ((User.IsInRole("ChiefAccountant") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2") || User.IsInRole("AccountOfficer")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Cash Advance
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/AdvancePayment/create">Create Cash Advance</a>
+                                    <a class="dropdown-item" href="/AdvancePayment/PendingAdvancePayment">Cash Advance on my desk</a>
+                                    <a class="dropdown-item" href="/AdvancePayment/viewApprovedCashAdvance">Approved Cash Advance</a>
+                                    <a class="dropdown-item" href="/AdvancePayment/viewUnApprovedCashAdvance">Processing Cash Advance</a>
+                                    <a class="dropdown-item" href="/AdvancePayment/AllAdvancePayment">View All Cash Advance</a>
+                                </div>
+                            </div>
+                        }
+                        else if ((User.IsInRole("Approval") || User.IsInRole("Staff")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Cash Advance
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/AdvancePayment/create">Create Cash Advance</a>
+                                    <a class="dropdown-item" href="/AdvancePayment/PendingAdvancePayment">Cash Advance on my desk</a>
+                                    <a class="dropdown-item" href="/AdvancePayment/AllAdvancePayment">Cash Advance created by you</a>
+                                </div>
+                            </div>
+                        }
 
                     }
+
+                    @if (signInManager.IsSignedIn(User))
+                    {
+                        if ((User.IsInRole("ChiefAccountant") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2") || User.IsInRole("AccountOfficer")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Cash Retirement
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/RetirementPayment/CreateCashRetirement">Create a Cash Retirement</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/viewcashadvancetoretire">Retire a cash advance</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/PendingRetirementPayment">Cash retirement on my desk</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/viewApprovedRetirementPayment">Approved cash retirement</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/viewUnApprovedRetirementPayment">Processing cash retirement</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/AllRetirementPayment">View all cash retirement</a>
+                                    
+                                </div>
+                            </div>
+                        }
+                        else if ((User.IsInRole("Approval")  || User.IsInRole("Staff")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Cash Retirement
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/RetirementPayment/CreateCashRetirement">Create a Cash Retirement</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/viewcashadvancetoretire">Retire a cash advance</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/PendingRetirementPayment">Cash retirement on my desk</a>
+                                    <a class="dropdown-item" href="/RetirementPayment/AllRetirementPayment">Cash Retirement created by you</a>
+                                </div>
+                            </div>
+                        }
+
+                    }
+                    @if (signInManager.IsSignedIn(User))
+                    {
+                        if ((User.IsInRole("ChiefAccountant") || User.IsInRole("Authorizer1") || User.IsInRole("Authorizer2") || User.IsInRole("AccountOfficer")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Petty Cash
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/PettyCash/create">Create Petty Cash</a>
+                                    <a class="dropdown-item" href="/PettyCash/PendingPettyCash">Petty cash on my desk</a>
+                                    <a class="dropdown-item" href="/PettyCash/viewApprovedPettyCash">Approved petty cash</a>
+                                    <a class="dropdown-item" href="/PettyCash/viewUnApprovedPettyCash">Processing petty cash</a>
+                                    <a class="dropdown-item" href="/PettyCash/AllPettyCash">View all petty cash</a>
+                                </div>
+                            </div>
+                        }
+                        else if ((User.IsInRole("Approval") || User.IsInRole("Staff") || User.IsInRole("Intern")))
+                        {
+                            <div class="dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Petty Cash
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/PettyCash/create">Create Petty Cash</a>
+                                    <a class="dropdown-item" href="/PettyCash/PendingPettyCash">Petty cash on my desk</a>
+                                    <a class="dropdown-item" href="/PettyCash/AllPettyCash">Petty Cash created by you </a>
+                                </div>
+                            </div>
+                        }
+
+                    }
+
+
+
 
                     @if (signInManager.IsSignedIn(User) && (User.IsInRole("ChiefAccountant") || User.IsInRole("Admin")))
                     {
@@ -86,6 +190,8 @@
                                 <a class="dropdown-item" href="/administration/listusers">Users</a>
                                 <a class="dropdown-item" href="/administration/listroles">Roles</a>
                                 <a class="dropdown-item" href="/administration/createparticular">Particulars</a>
+                                <a class="dropdown-item" href="/administration/createbank">Banks</a>
+                                <a class="dropdown-item" href="/administration/createdepartment">Departments</a>
                             </div>
                         </div>
                     }
@@ -102,6 +208,7 @@
                                         <a class="dropdown-item" asp-controller="account" asp-action="registration">Register</a>
                                         <a class="dropdown-item" asp-controller="account" asp-action="ChangePassword">Change Password</a>
                                         <a class="dropdown-item" asp-controller="account" asp-action="Edituser">Edit Account</a>
+                                        <a class="dropdown-item" asp-controller="administration" asp-action="UserToEdit">Edit User Account</a>
                                         <a class="dropdown-item" asp-controller="account" asp-action="logout">Log Out</a>
                                     </div>
                                 </div>
@@ -147,7 +254,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2021 - BrandOne Technologies Limited. All rights reserved. - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2021 - BrandOne Technologies Limited. All rights reserved. - <a href="#" @*asp-area="" asp-controller="Home" asp-action="Privacy"*@>Privacy</a>
         </div>
     </footer>
 

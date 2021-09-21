@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using VoucherAutomationSystem.Data;
 using VoucherAutomationSystem.Models;
 using VoucherAutomationSystem.ViewModels;
 
@@ -21,11 +22,13 @@ namespace VoucherAutomationSystem.Controllers
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly IHostingEnvironment hostingEnvironment;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IHostingEnvironment hostingEnvironment)
+        private readonly AppDbContext context;
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IHostingEnvironment hostingEnvironment, AppDbContext context)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.roleManager = roleManager;
+            this.context = context;
             this.hostingEnvironment = hostingEnvironment;
         }
 
@@ -33,8 +36,9 @@ namespace VoucherAutomationSystem.Controllers
         [HttpGet]
         public IActionResult Registration()
         {
-            var roles = roleManager.Roles;
-            return View(roles);
+            var roles = roleManager.Roles.ToList();
+            var depts = context.Departments.ToList();
+            return View(new RegViewModel { Roles = roles, Depts = depts});
         }
 
         [Authorize(Roles = "ChiefAccountant, Admin")]
@@ -42,7 +46,7 @@ namespace VoucherAutomationSystem.Controllers
         {
             string imageUrl = SavePhoto(registration.Photo);
             string result = "";
-            if (ModelState.IsValid)
+            if (registration != null)
             {
                 var user = new ApplicationUser
                 {
@@ -50,8 +54,9 @@ namespace VoucherAutomationSystem.Controllers
                     Email = registration.Email,
                     FirstName = registration.FirstName,
                     LastName = registration.LastName,
-                    SignatureImage = imageUrl
-
+                    SignatureImage = imageUrl,
+                    DeptId = registration.DeptId,
+                    RoleLead = registration.RoleLead
                 };
                 var isEmailInUse = userManager.Users.FirstOrDefault(x => x.Email == registration.Email);
                 if (isEmailInUse != null)
@@ -183,12 +188,15 @@ namespace VoucherAutomationSystem.Controllers
             }
             return Json(result);
         }
+
+        [Authorize]
         [HttpGet]
         public IActionResult ChangePassword()
         {
             return View();
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel changePasswordViewModel)
         {

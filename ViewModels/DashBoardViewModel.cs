@@ -27,5 +27,13 @@ namespace VoucherAutomationSystem.ViewModels
         public int DecCount { get; set; }
         public int PendingCount { get; set; }
         public int TotalVouchers { get; set; }
+        public int PettyCashCount { get; set; }
+        public int RetirementPaymentCount { get; set; }
+        public int CashAdvanceCount { get; set; }
+
+        public int TotalCashAdvance { get; set; }
+        public int TotalPettyCash { get; set; }
+        public int TotalRetirementCash { get; set; }
+
     }
 }

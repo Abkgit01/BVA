@@ -1,0 +1,66 @@
+﻿@model EditViewModel
+@{
+
+    ViewBag.Title = "Edit User";
+}
+
+
+<div class="container register">
+    <div class="row">
+        <div class="col-md-3 register-left">
+            <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="" />
+        </div>
+        <div class="col-md-9 register-right">
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <h3 class="register-heading" style="text-align:center; color : #092f89 ;">User Email</h3>
+                    <form  class="row register-form" method="post">
+                        <div class="col-md-6">
+                            <div class="form-group form-inline">
+                                <label>Email :</label>
+                                <input asp-for="Email" id="txtEmail" type="text" class="form-control" placeholder="Email *" value="" required />
+                            </div>
+
+                            <input formaction=@Url.Action("UserToEdit") formmethod="post" type="submit" class="btnRegister" value="Edit User" />
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        body {
+            background: #DCDCDC;
+        }
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $("#registerForm").on('submit', function (event) {
+                console.log(event)
+                event.preventDefault();
+                var msg = confirm("Are you sure you want to edit user account?");
+
+                var data = new FormData();
+                data.append("email", $("#txtEmail").val());
+                debugger
+
+                if (msg === true) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Administration/UserToEdit",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        async: false,
+
+
+                    });
+                }
+            });
+        });
+    </script>

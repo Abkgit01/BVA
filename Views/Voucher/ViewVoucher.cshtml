@@ -115,7 +115,9 @@
                         </tr>
                     </thead>
                     @{ var i = 0; }
-                    <tbody>
+                <tbody>
+                    @if (Model.Voucher.Currency == Currency.USD)
+                    {
                         @foreach (var t in Model.CashBooks)
                         {
                             i++;
@@ -124,26 +126,44 @@
                                 <td>@i</td>
                                 <td>@t.Particular</td>
                                 <td><small>@t.Description</small></td>
-                                <td>&#8358;@String.Format("{0:n0}", @t.Amount)</td>
-                                <td>&#8358;@String.Format("{0:n0}", @t.Amount)</td>
+                                <td>&#36;@String.Format("{0:n}", @t.Amount)</td>
+                                <td>&#36;@String.Format("{0:n}", @t.Amount)</td>
 
                             </tr>
                         }
-                        @*<tr style="font-size:large;">
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td>Home Currency Total</td>
-                                <td>@Model.Voucher.TotalAmount</td>
-                            </tr>*@
                         <tr style="font-size:medium;">
                             <td></td>
                             <td></td>
                             <td></td>
                             <td>Total</td>
-                            <td>&#8358;@String.Format("{0:n0}", @Model.Voucher.TotalAmount)</td>
+                            <td>&#36;@String.Format("{0:n}", @Model.Voucher.TotalAmount)</td>
                         </tr>
-                    </tbody>
+                    }
+                    else
+                    {
+                        @foreach (var t in Model.CashBooks)
+                        {
+                            i++;
+
+                            <tr style="font-size:medium;">
+                                <td>@i</td>
+                                <td>@t.Particular</td>
+                                <td><small>@t.Description</small></td>
+                                <td>&#8358;@String.Format("{0:n}", @t.Amount)</td>
+                                <td>&#8358;@String.Format("{0:n}", @t.Amount)</td>
+
+                            </tr>
+                        }
+                        <tr style="font-size:medium;">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>Total</td>
+                            <td>&#8358;@String.Format("{0:n}", @Model.Voucher.TotalAmount)</td>
+                        </tr>
+                    }
+
+                </tbody>
                 </table>
                 <br>
                 <b>Total in words</b>

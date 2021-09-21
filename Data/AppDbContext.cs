@@ -16,11 +16,26 @@ namespace VoucherAutomationSystem.Data
 
         }
         public DbSet<Particular> Particulars { get; set; }
+        public DbSet<Bank> Banks { get; set; }
         public DbSet<Models.Action> Actions { get; set; }
         public DbSet<CashBook> CashBooks { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<VoucherFile> VoucherFiles { get; set; }
         public DbSet<ApprovalVoucher> ApprovalVouchers { get; set; }
+        public DbSet<ApplicationFlow> ApplicationFlows { get; set; }
+        public DbSet<CashAdvance> CashAdvances { get; set; }
+        public DbSet<CashAdvanceAction> CashAdvanceActions { get; set; }
+        public DbSet<CashAdvanceFile> CashAdvanceFiles { get; set; }
+        public DbSet<CashAdvancePayment> CashAdvancePayments { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<PettyCash> PettyCashes { get; set; }
+        public DbSet<PettyCashAction> pettyCashActions { get; set; }
+        public DbSet<PettyCashApproval> PettyCashApprovals { get; set; }
+        public DbSet<PettyCashFile> pettyCashFiles { get; set; }
+        public DbSet<RetirementPaymentAction> RetirementPaymentActions { get; set; }
+        public DbSet<RetirementPayment> RetirementPayments { get; set; }
+        public DbSet<RetirementPaymentFile> RetirementPaymentFiles { get; set; }
+        public DbSet<RetirementCashBookPayments> RetirementCashBookPayments { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -66,20 +81,21 @@ namespace VoucherAutomationSystem.Data
                     Id = 6,
                     Name = "Admin",
                     NormalizedName = "ADMIN"
+                },
+                new ApplicationRole
+                {
+                    Id = 7,
+                    Name = "Staff",
+                    NormalizedName = "STAFF"
+                },
+                new ApplicationRole
+                {
+                    Id = 8,
+                    Name = "Intern",
+                    NormalizedName = "INTERN"
                 }
                 );
-            //builder.Entity<ApplicationUser>().HasData(
-            //    new ApplicationUser
-            //    {
-            //        Id = 7,
-            //        Email = "admin@gmail.com",
-            //        IsActive = true,
-            //        UserName = "admin@gmail.com",
-            //        FirstName = "Tega",
-            //        LastName = "Odiete",
-            //        PasswordHash = ""
-
-            //    }) ;
+            
         }
     }
 }

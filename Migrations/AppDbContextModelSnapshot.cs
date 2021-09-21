@@ -159,6 +159,32 @@ namespace VoucherAutomationSystem.Migrations
                     b.ToTable("Actions");
                 });
 
+            modelBuilder.Entity("VoucherAutomationSystem.Models.ApplicationFlow", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("DeptId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Lead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Sort")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("isFinal")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeptId");
+
+                    b.ToTable("ApplicationFlows");
+                });
+
             modelBuilder.Entity("VoucherAutomationSystem.Models.ApplicationRole", b =>
                 {
                     b.Property<int>("Id")
@@ -195,44 +221,58 @@ namespace VoucherAutomationSystem.Migrations
                         new
                         {
                             Id = 1,
-                            ConcurrencyStamp = "a412cabe-47cf-4662-aaac-cb8934cabf62",
+                            ConcurrencyStamp = "1ce4b08f-adec-41b6-bbce-ea142149df0c",
                             Name = "AccountOfficer",
                             NormalizedName = "ACCOUNTOFFICER"
                         },
                         new
                         {
                             Id = 2,
-                            ConcurrencyStamp = "853e873c-0f59-4d66-b2e0-819c762f017b",
+                            ConcurrencyStamp = "48c547f6-72d3-4775-9788-8c6a5f609c16",
                             Name = "ChiefAccountant",
                             NormalizedName = "CHIEFACCOUNTANT"
                         },
                         new
                         {
                             Id = 3,
-                            ConcurrencyStamp = "4861cf8a-5c7f-4a55-ae76-01c971b297fa",
+                            ConcurrencyStamp = "8b096560-7c03-4052-8868-465436ab7581",
                             Name = "Approval",
                             NormalizedName = "APPROVAL"
                         },
                         new
                         {
                             Id = 4,
-                            ConcurrencyStamp = "c8d0e6d2-f1f7-425d-a200-abf3fb11aaaf",
+                            ConcurrencyStamp = "7280c10c-4c2b-42de-8726-d9a90a3ce718",
                             Name = "Authorizer1",
                             NormalizedName = "AUTHORIZER1"
                         },
                         new
                         {
                             Id = 5,
-                            ConcurrencyStamp = "5f167cb1-005d-44ac-8a87-898b39eda256",
+                            ConcurrencyStamp = "be411f48-7f49-4aab-a6f4-3623fbbf6643",
                             Name = "Authorizer2",
                             NormalizedName = "AUTHORIZER2"
                         },
                         new
                         {
                             Id = 6,
-                            ConcurrencyStamp = "18067f0a-a5e0-4eb9-a25a-c1b3b18a428f",
+                            ConcurrencyStamp = "b13a5766-eda9-4a74-9c21-22f2e1bd64f2",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ConcurrencyStamp = "12aa52aa-ced5-4a09-a2d8-5766e229e15c",
+                            Name = "Staff",
+                            NormalizedName = "STAFF"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ConcurrencyStamp = "31638c1f-e29a-4a69-9bef-edf7664ef570",
+                            Name = "Intern",
+                            NormalizedName = "INTERN"
                         });
                 });
 
@@ -249,6 +289,9 @@ namespace VoucherAutomationSystem.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DeptId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -290,6 +333,9 @@ namespace VoucherAutomationSystem.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RoleLead")
                         .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
@@ -341,6 +387,158 @@ namespace VoucherAutomationSystem.Migrations
                     b.ToTable("ApprovalVouchers");
                 });
 
+            modelBuilder.Entity("VoucherAutomationSystem.Models.Bank", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("BankId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Banks");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentStage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeptId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ExchangeRate")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Retired")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeptId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CashAdvances");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvanceAction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("ActionPerformed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CashAdvanceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CashAdvanceActions");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvanceFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("CashAdvanceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashAdvanceId");
+
+                    b.ToTable("CashAdvanceFiles");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvancePayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CashAdvanceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashAdvanceId");
+
+                    b.ToTable("CashAdvancePayments");
+                });
+
             modelBuilder.Entity("VoucherAutomationSystem.Models.CashBook", b =>
                 {
                     b.Property<int>("Id")
@@ -348,8 +546,8 @@ namespace VoucherAutomationSystem.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -367,6 +565,21 @@ namespace VoucherAutomationSystem.Migrations
                     b.ToTable("CashBooks");
                 });
 
+            modelBuilder.Entity("VoucherAutomationSystem.Models.Department", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Departments");
+                });
+
             modelBuilder.Entity("VoucherAutomationSystem.Models.Particular", b =>
                 {
                     b.Property<int>("Id")
@@ -380,6 +593,269 @@ namespace VoucherAutomationSystem.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Particulars");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCash", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("CurrentStage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeptId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserToApprove")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeptId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PettyCashes");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCashAction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("ActionPerformed")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PettyCashId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("pettyCashActions");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCashApproval", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PettyCashID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PettyCashID");
+
+                    b.ToTable("PettyCashApprovals");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCashFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PettyCashId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PettyCashId");
+
+                    b.ToTable("pettyCashFiles");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementCashBookPayments", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RetirePaymentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RetirePaymentId");
+
+                    b.ToTable("RetirementCashBookPayments");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<decimal?>("CashAdvanceAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CashAdvanceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentStage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeptId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ExchangeRate")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCredit")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("TotalRetirementAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeptId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RetirementPayments");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementPaymentAction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<int>("ActionPerformed")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RetirementPaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RetirementPaymentActions");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementPaymentFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RetirementPaymentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RetirementPaymentId");
+
+                    b.ToTable("RetirementPaymentFiles");
                 });
 
             modelBuilder.Entity("VoucherAutomationSystem.Models.Voucher", b =>
@@ -434,8 +910,8 @@ namespace VoucherAutomationSystem.Migrations
                     b.Property<string>("RoleCreator")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TotalAmount")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("VoucherType")
                         .HasColumnType("int");
@@ -548,6 +1024,17 @@ namespace VoucherAutomationSystem.Migrations
                     b.Navigation("Voucher");
                 });
 
+            modelBuilder.Entity("VoucherAutomationSystem.Models.ApplicationFlow", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.Department", "Dept")
+                        .WithMany()
+                        .HasForeignKey("DeptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dept");
+                });
+
             modelBuilder.Entity("VoucherAutomationSystem.Models.ApprovalVoucher", b =>
                 {
                     b.HasOne("VoucherAutomationSystem.Models.Voucher", "voucher")
@@ -559,6 +1046,74 @@ namespace VoucherAutomationSystem.Migrations
                     b.Navigation("voucher");
                 });
 
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvance", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.Department", "Dept")
+                        .WithMany()
+                        .HasForeignKey("DeptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dept");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvanceAction", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvanceFile", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.CashAdvance", "CashAdvance")
+                        .WithMany()
+                        .HasForeignKey("CashAdvanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashAdvance");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.CashAdvancePayment", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.CashAdvance", "CashAdvance")
+                        .WithMany()
+                        .HasForeignKey("CashAdvanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashAdvance");
+                });
+
             modelBuilder.Entity("VoucherAutomationSystem.Models.CashBook", b =>
                 {
                     b.HasOne("VoucherAutomationSystem.Models.Voucher", "Voucher")
@@ -568,6 +1123,134 @@ namespace VoucherAutomationSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Voucher");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCash", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.Department", "Dept")
+                        .WithMany()
+                        .HasForeignKey("DeptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dept");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCashAction", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCashApproval", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.PettyCash", "petty")
+                        .WithMany()
+                        .HasForeignKey("PettyCashID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("petty");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.PettyCashFile", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.PettyCash", "Petty")
+                        .WithMany()
+                        .HasForeignKey("PettyCashId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Petty");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementCashBookPayments", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.RetirementPayment", "RetirementPayment")
+                        .WithMany()
+                        .HasForeignKey("RetirePaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RetirementPayment");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementPayment", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.Department", "Dept")
+                        .WithMany()
+                        .HasForeignKey("DeptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dept");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementPaymentAction", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoucherAutomationSystem.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("VoucherAutomationSystem.Models.RetirementPaymentFile", b =>
+                {
+                    b.HasOne("VoucherAutomationSystem.Models.RetirementPayment", "RetirementPayment")
+                        .WithMany()
+                        .HasForeignKey("RetirementPaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RetirementPayment");
                 });
 
             modelBuilder.Entity("VoucherAutomationSystem.Models.Voucher", b =>

@@ -1,0 +1,205 @@
+﻿@model AdvanceCreateViewModel
+@{
+
+    ViewBag.Title = "Create Page";
+}
+
+<div class="container CreateVoucher">
+    <div class="">
+        <h1 style="text-align:center; color : #092f89 ;">Create Advance Payment</h1>
+    </div>
+    <div class="row" id="FormCreateAdvance">
+        <form id="createAdvanceForm" enctype="multipart/form-data" class="row create-form" style="width:100%">
+            <div class="col-md-6" style="font-size:small">
+                <div class="form-group ">
+                    <label>First Name</label>
+                    <input id="txtFirstName" type="text" class="form-control form-control-sm" placeholder="First name" value="@Model.FirstName" disabled />
+                </div>
+                <div class="form-group ">
+                    <label>Last Name</label>
+                    <input id="txtLastName" type="text" class="form-control form-control-sm" placeholder="Last name" value="@Model.LastName" disabled />
+                </div>
+                <div class="form-group ">
+                    <label>Description</label>
+                    <textarea id="txtDescription" placeholder="Description" class="pb-cmnt-textarea form-control form-control-sm" required></textarea><br>
+                </div>
+            </div>
+            <div class="col-md-6" style="font-size:small">
+
+                <div class="form-group ">
+                    <label>Department</label>
+                    <input id="txtDept" type="text" class="form-control form-control-sm" placeholder="Last name" value="@Model.userDept" disabled />
+                    @*<select id="txtDept" name="txtParticular[]" required" class="form-control form-control-sm " required>
+            <option value="">Select Deptartment</option>
+            @foreach (var b in Model.Dept)
+            {
+                <option value="@b.ID">@b.Name</option>
+            }
+        </select>*@
+                </div>
+                <div class="form-group ">
+                    <label>Currency</label>
+                    <select id="txtCurrency" class="form-control form-control-sm" asp-items="Html.GetEnumSelectList<Currency>()" required>
+                        <option value="">select currency</option>
+                    </select>
+                </div>
+                <div class="form-group ">
+                    <label>Exchange Rate</label>
+                    <input id="txtExchangeRate" type="text" class="form-control form-control-sm" placeholder="Exchange rate " value="" required />
+                </div>
+                <div class="form-group ">
+                    <label>Comment</label>
+                    <textarea id="txtComment" placeholder="Comment" class="pb-cmnt-textarea form-control form-control-sm" required></textarea><br>
+                </div>
+            </div>
+
+            <table class="table table-hover table-bordered" style="font-size:small">
+                @*class="table-responsive"*@
+
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody id="AppendVouchers">
+                    <tr id="Remove1">
+                        
+                        <td>
+                            <input type="text" required class="form-control form-control-sm form-inline" placeholder="Enter Description" id="txtDescriptionCB[]" name="txtDescriptionCB[]" />
+                        </td>
+                        <td>
+                            <input type="number" step="any" required class="form-control form-control-sm form-inline amount" placeholder="Enter Amount" id="txtAmount_1" name="txtAmount[]" onkeyup=sumUp() />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
+                        </td>
+
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr style="font-size:medium;">
+                        <td><b>Total Amount</b></td>
+                        <td>
+                            <b><span id="sum_total"></span></b>
+                        </td>
+                    </tr>
+                </tbody>
+                @*<tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <input type="number" required class="form-control form-control-sm form-inline" placeholder="Total Amount" id="totalAmount" name="totalAmount" />
+                            </td>
+                        </tr>
+                    </tbody>*@
+            </table>
+            <div style="text-align:center;">
+                <input class="btn btn-primary" type="submit" id="btnSaveLegacyApplication" @*class="btn btn-success"*@ value="Save & Continue" />
+                <input type="reset" class="btn btn-secondary m-b-10 m-l-5">
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+    body {
+        background: #DCDCDC;
+    }
+
+    .Submitloader {
+        position: relative;
+    }
+
+        .Submitloader::after {
+            background-color: rgba(0,0,0,0.4);
+            content: 'Submitting...';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+</style>
+<script>
+    var Vouchers_i = 1;
+    function Add() {
+        Vouchers_i++;
+        var html = "<tr id='Remove" + Vouchers_i + "'><td> <input type='text' required class='form-control form-control-sm form-inline' placeholder='Enter Description' id ='txtDescriptionCB[]' name='txtDescriptionCB[]' /></td>";
+        //html += "<td><input type='text' required class='form-control form-control-sm form-inline' placeholder='Enter Description' id ='txtDescriptionCB[]' name='txtDescriptionCB[]' /></td >";
+        html += "<td><input type='number' step='any' onkeyup=sumUp() required class='form-control form-control-sm form-inline amount' placeholder='Enter Amount' id='txtAmount_" + Vouchers_i + "' name='txtAmount[]' /></td >";
+        html += "<td> <button class='btn btn-danger btn-sm'  onclick='RemoveVoucher("+Vouchers_i+");'> <i class='fa fa-trash'> </i> </button> </td> </tr >";
+        $("#AppendVouchers tr:last").after(html);
+    }
+    function RemoveVoucher(target_id) {
+        $("#Remove" + target_id).remove();
+        sumUp();
+    }
+</script>
+
+<script>
+    function sumUp() {
+        var total = 0;
+        $(".amount").each(function () {
+            var unitId = "#" + this.id;
+            var d = $(unitId).val();
+            console.log(this.id);
+            if (d != null && d != '') {
+                total = total + parseFloat(d);
+            }
+        });
+        $("#sum_total").html(total)
+    }
+    $("#createAdvanceForm").on('submit', function (event) {
+        console.log(event)
+        event.preventDefault();
+        var msg = confirm("Are you sure you want to create this Advance Payment?");
+
+        if (msg === true) {
+            $("#FormCreateAdvance").addClass("Submitloader");
+            var Advance = {
+                FirstName: $("#txtFirstName").val(),
+                LastName: $("#txtLastName").val(),
+                Description: $("#txtDescription").val(),
+                DeptId: $("#txtDept").val(),
+                Currency: $("#txtCurrency").val(),
+                ExchangeRate: $("#txtExchangeRate").val(),
+                Comment: $("#txtComment").val(),
+            };
+            var AdvanceCB = [];
+            var Description = document.getElementsByName('txtDescriptionCB[]');
+            var Amount = document.getElementsByName('txtAmount[]');
+            for (var i = 0; i < Description.length; i++) {
+                AdvanceCB.push({
+                    "Description": Description[i].value.trim(),
+                    "Amount": Amount[i].value.trim(),
+                });
+            }
+            debugger
+
+
+            $.post("/AdvancePayment/Create", { "cashAdvance": Advance, "cashAdvancePayments": AdvanceCB }, function (response) {
+                var res = $.trim(response).split("|");
+                if (res[0] === "1") {
+                    alert(res[2]);
+                    var location = window.location.origin + "/AdvancePayment/AddFiles/" + res[1];
+                    window.location.href = location;
+                    $("#FormCreateAdvance").removeClass("Submitloader");
+                }
+                else {
+                    alert(res[2]);
+                    ErrorMessage("#SaveTankInfo", res[1]);
+                    $("#FormCreateAdvance").removeClass("Submitloader");
+                }
+            });
+        }
+        else {
+            $("#FormCreateAdvance").removeClass("Submitloader");
+        }
+    });
+</script>

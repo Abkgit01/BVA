@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Particular>
+﻿@model CreateVoucherViewModel
 @{
 
     ViewBag.Title = "Create Page";
@@ -9,7 +9,7 @@
         <h1 style="text-align:center; color : #092f89 ;">Create Voucher</h1>
     </div>
     <div class="row" id="FormCreateVoucher">
-        <form id="createVoucherForm" enctype="multipart/form-data" class="row create-form"  style="width:100%">
+        <form id="createVoucherForm" enctype="multipart/form-data" class="row create-form" style="width:100%">
             <div class="col-md-6" style="font-size:small">
                 <div class="form-group ">
                     <label>Account Payee</label>
@@ -29,7 +29,13 @@
                 </div>
                 <div class="form-group ">
                     <label>Bank Name</label>
-                    <input id="txtBankName" type="text" class="form-control form-control-sm" placeholder="Bank name " value="" />
+                    <select id="txtBankName" name="txtBankName" required" class="form-control form-control-sm form-inline" required>
+                        <option value="">Select Bank</option>
+                        @foreach (var b in Model.Banks)
+                        {
+                            <option value="@b.Name">@b.Name     @b.BankId</option>
+                        }
+                    </select>
                 </div>
                 <div class="form-group ">
                     <label>Bank Account No</label>
@@ -59,12 +65,12 @@
                 </div>
                 <div class="form-group ">
                     <label>Exchange Rate</label>
-                    <input id="txtExchangeRate" type="text" class="form-control form-control-sm" placeholder="Exchange rate " value="" />
+                    <input id="txtExchangeRate" type="text" class="form-control form-control-sm" placeholder="Exchange rate " value="" required />
                 </div>
                 @*<div class="form-group ">
-                    <label>Add File(s)</label>
-                    <input name="txtAddFiles" id="txtAddFiles" type="file" class="form-control form-control-sm" placeholder="Add File " value="" multiple />
-                </div>*@
+                        <label>Add File(s)</label>
+                        <input name="txtAddFiles" id="txtAddFiles" type="file" class="form-control form-control-sm" placeholder="Add File " value="" multiple />
+                    </div>*@
                 <div class="form-group ">
                     <label>Comment</label>
                     <textarea id="txtComment" placeholder="Comment" class="pb-cmnt-textarea form-control form-control-sm" required></textarea><br>
@@ -85,11 +91,11 @@
                 </thead>
 
                 <tbody id="AppendVouchers">
-                    <tr>
+                    <tr id="Remove1">
                         <td>
                             <select id="txtParticular[]" name="txtParticular[]" required" class="form-control form-control-sm form-inline" required>
-                                <option>Select Particular</option>
-                                @foreach (var b in Model)
+                                <option value="">Select Particular</option>
+                                @foreach (var b in Model.Particulars)
                                 {
                                     <option value="@b.Name">@b.Name</option>
                                 }
@@ -99,10 +105,20 @@
                             <input type="text" required class="form-control form-control-sm form-inline" placeholder="Enter Description" id="txtDescriptionCB[]" name="txtDescriptionCB[]" />
                         </td>
                         <td>
-                            <input type="number" required class="form-control form-control-sm form-inline" placeholder="Enter Amount" id="txtAmount[]" name="txtAmount[]" @*onkeyup="sum()"*@ />
+                            <input type="number" step="any" required class="form-control form-control-sm form-inline amount" placeholder="Enter Amount" id="txtAmount_1" name="txtAmount[]" onkeyup=sumUp() />
                         </td>
                         <td>
-                            <button class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="Add();"> <i class="fa fa-plus"> </i> </button>
+                        </td>
+
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr style="font-size:medium;">
+                        <td></td>
+                        <td><b>Total Amount</b></td>
+                        <td>
+                            <b><span id="sum_total"></span></b>
                         </td>
                     </tr>
                 </tbody>
@@ -150,15 +166,15 @@
     var Vouchers_i = 1;
     function Add() {
         Vouchers_i++;
-        var html = "<tr id='Remove" + Vouchers_i + "'><td><select id='txtParticular[]' name='txtParticular[]' required' class='form-control form-control-sm form-inline'><option>Select Particular</option> @foreach (var b in Model) { <option value= '@b.Name' > @b.Name </option> } </select> </td>";
+        var html = "<tr id='Remove" + Vouchers_i + "'><td><select id='txtParticular[]' name='txtParticular[]' required' class='form-control form-control-sm form-inline'><option>Select Particular</option> @foreach (var b in Model.Particulars) { <option value= '@b.Name' > @b.Name </option> } </select> </td>";
         html += "<td><input type='text' required class='form-control form-control-sm form-inline' placeholder='Enter Description' id ='txtDescriptionCB[]' name='txtDescriptionCB[]' /></td >";
-        html += "<td><input type='number' required class='form-control form-control-sm form-inline' placeholder='Enter Amount' id='txtAmount[]' name='txtAmount[]' /></td >";
-        html += "<td> <button class='btn btn-danger btn-sm' onclick='RemoveVoucher();'> <i class='fa fa-trash'> </i> </button> </td> </tr >";
+        html += "<td><input type='number' step='any' onkeyup=sumUp() required class='form-control form-control-sm form-inline amount' placeholder='Enter Amount' id='txtAmount_" + Vouchers_i + "' name='txtAmount[]' /></td >";
+        html += "<td> <button class='btn btn-danger btn-sm'  onclick='RemoveVoucher("+Vouchers_i+");'> <i class='fa fa-trash'> </i> </button> </td> </tr >";
         $("#AppendVouchers tr:last").after(html);
     }
-    function RemoveVoucher() {
-        $("#Remove" + Vouchers_i).remove();
-        Vouchers_i--;
+    function RemoveVoucher(target_id) {
+        $("#Remove" + target_id).remove();
+        sumUp();
     }
 </script>
 @*<script type="text/javascript">
@@ -176,6 +192,18 @@
         }
     </script>*@
 <script>
+    function sumUp() {
+        var total = 0;
+        $(".amount").each(function () {
+            var unitId = "#" + this.id;
+            var d = $(unitId).val();
+            console.log(this.id);
+            if (d != null && d != '') {
+                total = total + parseFloat(d);
+            }
+        });
+        $("#sum_total").html(total)
+    }
     $("#createVoucherForm").on('submit', function (event) {
         console.log(event)
         event.preventDefault();
@@ -209,8 +237,8 @@
                 });
             }
             debugger
-            
-            
+
+
             $.post("/Voucher/Create", { "cashBookViewModels": VouchersCB, "voucher": Vouchers }, function (response) {
                 var res = $.trim(response).split("|");
                 if (res[0] === "1") {

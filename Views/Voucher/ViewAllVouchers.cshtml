@@ -51,81 +51,88 @@
 
                     var VoucherId = @a.Id.ToString("D3");
 
-                    <tr>
+                <tr>
 
-                        @if (a.VoucherType == VoucherType.Payment)
+                    @if (a.VoucherType == VoucherType.Payment)
+                    {
+                        <td class="text-danger"> <b>PAY@{@VoucherId}</b> </td>
+                    }
+                    else
+                    {
+                        <td class="text-danger"> <b>REC@{@VoucherId}</b> </td>
+                    }
+                    @if (a.IsActive == true)
+                    {
+                        <td> Approved</td>
+                    }
+                    else
+                    {
+                        <td> @a.CurrentLevelRoleName</td>
+                    }
+
+
+                    <td><small>@a.Description</small> </td>
+                    @if (a.Currency == Currency.USD)
+                    {
+                        <td>&#36;@String.Format("{0:n}", @a.TotalAmount)</td>
+                    }
+                    else
+                    {
+                        <td>&#8358;@String.Format("{0:n}", @a.TotalAmount)</td>
+                    }
+                    @{
+                        if (a.IsActive == true)
                         {
-                            <td class="text-danger"> <b>PAY@{@VoucherId}</b> </td>
+                            <td> <span class="btn btn-success btn-sm"> Approved </span> </td>
                         }
                         else
                         {
-                            <td class="text-danger"> <b>REC@{@VoucherId}</b> </td>
+                            <td> <span class="btn btn-warning btn-sm"> Processing </span> </td>
                         }
-                        @if (a.IsActive == true)
+                    }
+                    <td> @a.DateCreated</td>
+                    <td>
+                        @if (signInManager.IsSignedIn(User) && (User.IsInRole("ChiefAccountant") || User.IsInRole("AccountOfficer")))
                         {
-                            <td> Approved</td>
+                            <div class="" role="group">
+                                @if (a.IsActive == true)
+                                {
+                                    <a href="/voucher/viewvoucher/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+                                }
+                                else if ((a.CurrentLevelRoleName == "AccountOfficer") || (a.CurrentLevelRoleName == "ChiefAccountant") || (a.CurrentLevelRoleName == "Approval") || (a.CurrentLevelRoleName == "Authorizer1"))
+                                {
+                                    <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+
+                                }
+                                else
+                                {
+                                    <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+                                }
+
+                                <p></p>
+
+                            </div>
                         }
                         else
                         {
-                            <td> @a.CurrentLevelRoleName</td>
+                            <div class="" role="group">
+                                @if (a.IsActive == true)
+                                {
+                                    <a href="/voucher/viewvoucher/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
+                                }
+                                else
+                                {
+                                    <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View</a>
+                                }
+
+                                <p></p>
+
+                            </div>
                         }
 
 
-                        <td><small>@a.Description</small> </td>
-                        <td>&#8358;@String.Format("{0:n0}", @a.TotalAmount)</td>
-                        @{
-                            if (a.IsActive == true)
-                            {
-                                <td> <span class="btn btn-success btn-sm"> Approved </span> </td>
-                            }
-                            else
-                            {
-                                <td> <span class="btn btn-warning btn-sm"> Processing </span> </td>
-                            }
-                        }
-                        <td> @a.DateCreated</td>
-                        <td>
-                            @if (signInManager.IsSignedIn(User) && (User.IsInRole("ChiefAccountant") || User.IsInRole("AccountOfficer")))
-                            {
-                                <div class="" role="group">
-                                    @if (a.IsActive == true)
-                                    {
-                                        <a href="/voucher/viewvoucher/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
-                                    }
-                                    else if ((a.CurrentLevelRoleName == "AccountOfficer") || (a.CurrentLevelRoleName == "ChiefAccountant") || (a.CurrentLevelRoleName == "Approval") || (a.CurrentLevelRoleName == "Authorizer1"))
-                                    {
-                                        <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
-
-                                    }
-                                    else
-                                    {
-                                        <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
-                                    }
-
-                                    <p></p>
-
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="" role="group">
-                                    @if (a.IsActive == true)
-                                    {
-                                        <a href="/voucher/viewvoucher/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View </a>
-                                    }
-                                    else
-                                    {
-                                        <a href="/voucher/voucheraction/@VoucherId" class="btn btn-sm btn-primary"> <i class="fa fa-eye"> </i> View</a>
-                                    }
-
-                                    <p></p>
-
-                                </div>
-                            }
-
-
-                        </td>
-                    </tr>
+                    </td>
+                </tr>
                 }
 
             </tbody>

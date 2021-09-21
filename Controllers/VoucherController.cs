@@ -24,31 +24,40 @@ namespace VoucherAutomationSystem.Controllers
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IApplicationService voucherService;
+        private readonly IAdvancePaymentService advancePayment;
+        private readonly IPettyCashService pettyCash;
+        private readonly IRetirementPaymentService retirementPayment;
         private readonly AppDbContext context;
 
         public VoucherController(RoleManager<ApplicationRole> roleManager,
             UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-            IApplicationService voucherService, AppDbContext context)
+            IApplicationService voucherService, AppDbContext context, IAdvancePaymentService advancePayment, IRetirementPaymentService retirementPayment, IPettyCashService pettyCash)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.voucherService = voucherService;
             this.context = context;
+            this.pettyCash = pettyCash;
+            this.retirementPayment = retirementPayment;
+            this.advancePayment = advancePayment;
         }
 
         [Authorize(Roles = "AccountOfficer, ChiefAccountant")]
         [HttpGet]
-        public ViewResult Create()
+        public async Task<ViewResult> Create()
         {
-            var particulars = context.Particulars;
-            return View(particulars);
+            var particulars = await context.Particulars.ToListAsync();
+            var banks = await context.Banks.ToListAsync();
+            return View(new CreateVoucherViewModel { Banks = banks, Particulars = particulars});
         }
+
         [Authorize(Roles = "AccountOfficer, ChiefAccountant")]
         [HttpPost]
         public async Task<IActionResult> Create(VoucherViewModel voucher, List<CashBookViewModel> cashBookViewModels /*VoucherModel voucherModel*/)
         {
             string result;
+            //var yes = User.IsInRole("AccountOfficer");
             var user = await userManager.GetUserAsync(User);
             if (user.IsActive == false)
             {
@@ -63,7 +72,7 @@ namespace VoucherAutomationSystem.Controllers
             if (res != null)
             {
                 var mailUsers = await userManager.GetUsersInRoleAsync(res.CurrentLevelRoleName);
-                SendMail(res, mailUsers.ToList(), voucher.Comment);
+                await SendMail(res, mailUsers.ToList(), voucher.Comment);
                 result = "1|" + res.Id + "|Voucher created successfully!";
             }
             else
@@ -76,7 +85,11 @@ namespace VoucherAutomationSystem.Controllers
         [HttpGet]
         public async Task<ViewResult> GetVoucher(int Id)
         {
-            var voucher = await voucherService.GetVoucher(Id);
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
+            var voucher = await voucherService.GetVoucher(Id, role.Name);
             var cashBooks = await voucherService.GetCashbook(Id);
             if (voucher == null)
             {
@@ -90,12 +103,16 @@ namespace VoucherAutomationSystem.Controllers
         [HttpGet]
         public async Task<ViewResult> VoucherAction(int Id)
         {
-            var voucher = await voucherService.GetVoucher(Id);
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
+            var voucher = await voucherService.GetVoucher(Id, role.Name);
             var cashBooks = await voucherService.GetCashbook(Id);
             var actions = await voucherService.GetVoucherActions(Id);
             foreach (var action in actions)
             {
-                action.User = await userManager.FindByIdAsync(action.Id.ToString());
+                action.User = await userManager.Users.FirstOrDefaultAsync(x => x.Id == action.UserId);
                 //action.User = await userManager.Users.FirstOrDefaultAsync(u => u.Id == action.Id);
             }
             return View(new VoucherCashBookViewModel { Voucher = voucher, CashBooks = cashBooks, Actions = actions.OrderBy(x => x.DateUpdated) });
@@ -105,8 +122,12 @@ namespace VoucherAutomationSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> EditVoucher(int Id)
         {
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
             var particulars = context.Particulars.ToList(); ;
-            var voucher = await voucherService.GetVoucher(Id);
+            var voucher = await voucherService.GetVoucher(Id, role.Name);
             var cashBooks = await voucherService.GetCashbook(Id);
             var actions = await voucherService.GetVoucherActions(Id);
             if ((voucher.CurrentLevelRoleName == "ChiefAccountant" || voucher.CurrentLevelRoleName == "AccountOfficer") || voucher.CurrentLevelRoleName == "Authorizer1" || voucher.CurrentLevelRoleName == "Approval")
@@ -136,7 +157,7 @@ namespace VoucherAutomationSystem.Controllers
                 if (res != null)
                 {
                     var mailUsers = await userManager.GetUsersInRoleAsync(res.CurrentLevelRoleName);
-                    SendMail(res, mailUsers.ToList(), comment.Comment);
+                    await SendMail(res, mailUsers.ToList(), comment.Comment);
                     result = "1|" + res.Id + "|Voucher updated successfully!";
                 }
                 else
@@ -166,6 +187,10 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
 
             var res = await voucherService.GetVouchersForRole(role.Id, user.Id);
+            foreach (var re in res)
+            {
+                re.TotalAmount /= Convert.ToDecimal(re.ExchangeRate);
+            }
             return View(res.OrderByDescending(x => x.DateCreated));
         }
 
@@ -182,7 +207,37 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
 
             var res = await voucherService.GetVouchersForRole(role.Id, user.Id);
-            var vouchers = await voucherService.GetAllVouchers();
+            var vouchers = await voucherService.GetAllVouchers(role.Name);
+            foreach (var voucher in vouchers)
+            {
+                if (voucher.Currency == Currency.USD)
+                {
+                    voucher.TotalAmount /= Convert.ToDecimal(voucher.ExchangeRate);
+                }
+            }
+            foreach (var voucher in vouchers)
+            {
+                
+                if (voucher.IsActive == false)
+                {
+                    if (voucher.CurrentLevelRoleName == "Approval")
+                    {
+                        var approval = await context.ApprovalVouchers.FirstOrDefaultAsync(x => x.VoucherId == voucher.Id && x.IsActive == false);
+                        
+                        if (approval != null)
+                        {
+                            var approvalUser = await userManager.Users.FirstOrDefaultAsync(x => x.Id == approval.UserId);
+                            voucher.CurrentLevelRoleName = approvalUser.FirstName + " " + approvalUser.LastName;
+                        }
+                    }
+                    else
+                    {
+                        var voucherUsers = await userManager.GetUsersInRoleAsync(voucher.CurrentLevelRoleName);
+                        var voucherUser = voucherUsers.FirstOrDefault(x => x.IsActive == true);
+                        voucher.CurrentLevelRoleName = voucherUser.FirstName +" "+ voucherUser.LastName;
+                    }
+                }
+            }
             int totalPendingVouchers = res.Count();
             return View(new ViewAllVouchersModel { vouchers = vouchers.OrderByDescending(x => x.DateCreated).ToList(), TotalPendingVouchers = totalPendingVouchers });
         }
@@ -200,7 +255,11 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             if (role != null)
             {
-                var res = await voucherService.GetActiveVouchers();
+                var res = await voucherService.GetActiveVouchers(role.Name);
+                foreach (var re in res)
+                {
+                    re.TotalAmount /= Convert.ToDecimal(re.ExchangeRate);
+                }
                 return View(res.OrderByDescending(x => x.DateCreated).ToList());
             }
             else
@@ -220,6 +279,10 @@ namespace VoucherAutomationSystem.Controllers
                 var roles = await userManager.GetRolesAsync(user);
                 var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
                 var res = await voucherService.GetInActiveVouchers(role.Id);
+                foreach (var re in res)
+                {
+                    re.TotalAmount /= Convert.ToDecimal(re.ExchangeRate);
+                }
                 return View(res.OrderByDescending(x => x.DateCreated).ToList());
             }
             catch (Exception)
@@ -250,7 +313,7 @@ namespace VoucherAutomationSystem.Controllers
                     if (res.IsActive == false)
                     {
                         var mailUsers = await userManager.GetUsersInRoleAsync(res.CurrentLevelRoleName);
-                        SendMail(res, mailUsers.ToList(), voucherCashBookViewModel.Comment);
+                        await SendMail(res, mailUsers.ToList(), voucherCashBookViewModel.Comment);
                         if (voucherCashBookViewModel.ActionPerformed == 2)
                         {
                             result = "1|Approval successfull!";
@@ -262,8 +325,35 @@ namespace VoucherAutomationSystem.Controllers
                     }
                     else
                     {
-                        var mailUsers = await userManager.Users.ToListAsync();
-                        SendMail(res, mailUsers, voucherCashBookViewModel.Comment);
+                        List<ApplicationUser> mailUsers = new List<ApplicationUser>();
+                        var allUsers = await userManager.Users.ToListAsync();
+                        if (res.TotalAmount > 50000)
+                        {
+                            //HashSet<ApplicationUser> mailUsers = new HashSet<ApplicationUser>();
+                            var actions = await context.Actions.Where(x => x.VoucherId == res.Id).ToListAsync();
+                            foreach (var action in actions)
+                            {
+                                mailUsers.Add(await context.Users.FirstOrDefaultAsync(x => x.Id == action.UserId));
+                            }
+                        }
+                        else
+                        {
+                            foreach (var mailUser in allUsers)
+                            {
+                                var userRole = await userManager.GetRolesAsync(mailUser);
+                                if (userRole != null)
+                                {
+                                    var roleDetail = await roleManager.FindByNameAsync(userRole.SingleOrDefault());
+                                    if (roleDetail.Name == "ChiefAccountant" || roleDetail.Name == "AccountOfficer" || roleDetail.Name == "Authorizer1" || roleDetail.Name == "Authorizer2" || roleDetail.Name == "Approval")
+                                    {
+                                        mailUsers.Add(mailUser);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        //context.Entry(allUsers).State = EntityState.Detached;
+                        await SendMail(res, mailUsers, voucherCashBookViewModel.Comment);
                         if (voucherCashBookViewModel.ActionPerformed == 2)
                         {
                             result = "1|Approval successfull!";
@@ -288,7 +378,60 @@ namespace VoucherAutomationSystem.Controllers
 
         }
 
-        [HttpGet]
+        
+        public async Task<IActionResult> VoucherActionOnAll(int id)
+        {
+            try
+            {
+                
+                var user = await userManager.GetUserAsync(User);
+                var roles = await userManager.GetRolesAsync(user);
+                var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+                string comment = "Approved";
+                if (user.IsActive == false)
+                {
+                    await signInManager.SignOutAsync();
+                    return RedirectToAction("Login", "Account");
+                }
+                var vouchers = await voucherService.GetVouchersForRole(role.Id, user.Id);
+                foreach (var voucher in vouchers)
+                {
+                    var res = await voucherService.PerformActionOnVoucher(voucher.Id, user.Id, role.Id,
+                    comment, (ActionPerformed)id);
+
+                    if (res != null)
+                    {
+                        if (res.IsActive == false)
+                        {
+                            var mailUsers = await userManager.GetUsersInRoleAsync(res.CurrentLevelRoleName);
+                            await SendMail(res, mailUsers.ToList(), comment);
+                            
+                        }
+                        else
+                        {
+                            HashSet<ApplicationUser> mailUsers = new HashSet<ApplicationUser>();
+                            var actions = await context.Actions.Where(x => x.VoucherId == res.Id).ToListAsync();
+                            foreach (var action in actions)
+                            {
+                                mailUsers.Add(await context.Users.FirstOrDefaultAsync(x => x.Id == action.UserId));
+                            }
+                            await SendMail(res, mailUsers.ToList(), comment);
+                        }
+                    }
+                }
+
+                return RedirectToAction("VouchersPending");
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+            
+        }
+
+            [HttpGet]
         public async Task<ViewResult> GetVoucherFiles(int Id)
         {
             var voucherFiles = await voucherService.GetVoucherFiles(Id);
@@ -306,7 +449,6 @@ namespace VoucherAutomationSystem.Controllers
         {
             try
             {
-                string result;
                 var user = await userManager.GetUserAsync(User);
                 var roles = await userManager.GetRolesAsync(user);
                 var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
@@ -326,7 +468,6 @@ namespace VoucherAutomationSystem.Controllers
         {
             try
             {
-                string result;
                 var user = await userManager.GetUserAsync(User);
                 var roles = await userManager.GetRolesAsync(user);
                 var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
@@ -415,14 +556,14 @@ namespace VoucherAutomationSystem.Controllers
         //}
 
         [HttpGet]
-        public string SendMail(Voucher voucher, List<ApplicationUser> users,string comment)
+        public async Task<string> SendMail(Voucher voucher, List<ApplicationUser> users,string comment)
         {
             MailModel mailModel = new MailModel();
             var result = "";
 
             if (voucher.IsActive == false)
             {
-                string msg = "Dear Sir/Ma, you have a new voucher on your desk. Click to view https://bva.azurewebsites.net/voucher/voucheraction/" + voucher.Id + ". Comment: " + comment;
+                string msg = $"Dear Sir/Ma, you have a new voucher on your desk. Click to view https://bva.azurewebsites.net/voucher/voucheraction/{voucher.Id}"  + " . Comment: " + comment;
                 MailMessage mail = new MailMessage();
 
                 if (voucher.CurrentLevelRoleName == "Approval")
@@ -442,8 +583,8 @@ namespace VoucherAutomationSystem.Controllers
                     }
                 }
                 
-                mail.From = new MailAddress("support@brandonetech.com");
-                mail.Subject = "New Voucher";
+                mail.From = new MailAddress("support@brandonetech.com" );
+                mail.Subject = "NEW VOUCHER ON YOUR DESK";
                 //string Body = mailModel.Body;
                 mail.Body = msg;
                 mail.IsBodyHtml = true;
@@ -451,24 +592,21 @@ namespace VoucherAutomationSystem.Controllers
                 smtp.Host = "smtppro.zoho.com";
                 smtp.Port = 587;
                 smtp.UseDefaultCredentials = false;
-                smtp.Credentials = new System.Net.NetworkCredential("support@brandonetech.com", "*123*brandonetech#"); // Enter senders User name and password       
+                smtp.Credentials = new System.Net.NetworkCredential("support@brandonetech.com", "*123*brandonetech#" ); // Enter senders User name and password       
                 smtp.EnableSsl = true;
                 smtp.Send(mail);
                 //return result;
             }
             else if (voucher.IsActive == true)
             {
-                string msg = $"This voucher has been approved, click to view. https://bva.azurewebsites.net/voucher/viewvoucher/" + voucher.Id + ". Comment: " + comment;
+                string msg = $"This voucher has been approved, click to view. https://bva.azurewebsites.net/voucher/viewvoucher/{voucher.Id}"  + " . Comment: " + comment;
                 MailMessage mail = new MailMessage();
                 foreach (var user in users)
                 {
-                    if (user.IsActive == true)
-                    {
                         mail.To.Add(user.Email);
-                    }
                 }
-                mail.From = new MailAddress("support@brandonetech.com");
-                mail.Subject = "Voucher Approved";
+                mail.From = new MailAddress("support@brandonetech.com" );
+                mail.Subject = "VOUCHER APPROVED";
                 //string Body = mailModel.Body;
                 mail.Body = msg;
                 mail.IsBodyHtml = true;
@@ -476,7 +614,7 @@ namespace VoucherAutomationSystem.Controllers
                 smtp.Host = "smtppro.zoho.com";
                 smtp.Port = 587;
                 smtp.UseDefaultCredentials = false;
-                smtp.Credentials = new System.Net.NetworkCredential("support@brandonetech.com", "*123*brandonetech#"); // Enter senders User name and password       
+                smtp.Credentials = new System.Net.NetworkCredential("support@brandonetech.com", "*123*brandonetech#" ); // Enter senders User name and password       
                 smtp.EnableSsl = true;
                 smtp.Send(mail);
             }
@@ -489,7 +627,11 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             if (role != null)
             {
-                var voucher = await voucherService.GetVoucher(Id);
+                var voucher = await voucherService.GetVoucher(Id, role.Name);
+                if (voucher == null)
+                {
+                    return RedirectToAction("DashBoard");
+                }
                 var cashBooks = await voucherService.GetCashbook(Id);
                 var actions = await voucherService.GetVoucherActions(Id);
                 var voucherFiles = await voucherService.GetVoucherFiles(Id);
@@ -513,7 +655,7 @@ namespace VoucherAutomationSystem.Controllers
                     }
 
                 }
-                string numberInWords = NumberToWords.ConvertAmount(voucher.TotalAmount.Value);
+                string numberInWords = NumberToWords.ConvertAmount(Convert.ToDouble(voucher.TotalAmount.Value));
                 return View("ViewVoucher", new VoucherCashBookViewModel { Voucher = voucher, CashBooks = cashBooks, Actions = ActionList.OrderBy(x => x.DateUpdated), NumberInWords = numberInWords, VoucherFiles = voucherFiles });
                 //return new ViewAsPdf("ViewVoucher", new VoucherCashBookViewModel { Voucher = voucher, CashBooks = cashBooks, Actions = ActionList.OrderBy(x => x.DateUpdated), NumberInWords = numberInWords })
                 //{
@@ -535,7 +677,7 @@ namespace VoucherAutomationSystem.Controllers
             var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             if (role != null)
             {
-                var voucher = await voucherService.GetVoucher(Id);
+                var voucher = await voucherService.GetVoucher(Id, role.Name);
                 var cashBooks = await voucherService.GetCashbook(Id);
                 var actions = await voucherService.GetVoucherActions(Id);
                 var voucherFiles = await voucherService.GetVoucherFiles(Id);
@@ -559,7 +701,7 @@ namespace VoucherAutomationSystem.Controllers
                     }
 
                 }
-                string numberInWords = NumberToWords.ConvertAmount(voucher.TotalAmount.Value);
+                string numberInWords = NumberToWords.ConvertAmount(Convert.ToDouble(voucher.TotalAmount.Value));
                 //return View("ViewVoucherPdf", new VoucherCashBookViewModel { Voucher = voucher, CashBooks = cashBooks, Actions = ActionList.OrderBy(x => x.DateUpdated), NumberInWords = numberInWords, VoucherFiles = voucherFiles });
                 return new ViewAsPdf("ViewVoucherPdf", new VoucherCashBookViewModel { Voucher = voucher, CashBooks = cashBooks, Actions = ActionList.OrderBy(x => x.DateUpdated), NumberInWords = numberInWords, VoucherFiles = voucherFiles })
                 {
@@ -570,37 +712,87 @@ namespace VoucherAutomationSystem.Controllers
             return View();
         }
 
+
         [HttpGet]
         public async Task<IActionResult> DashBoard()
         {
             var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
             if (user.IsActive == false)
             {
                 await signInManager.SignOutAsync();
                 return RedirectToAction("Login", "Account");
             }
             var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
             var dashBoard = await voucherService.DashBoard();
             //IEnumerable<Voucher> res;
-            foreach (var role in roles)
+            foreach (var rolee in roles)
             {
-                var rol = await roleManager.FindByNameAsync(role);
+                var rol = await roleManager.FindByNameAsync(rolee);
                 var res = await voucherService.GetVouchersForRole(rol.Id, user.Id);
                 dashBoard.PendingCount = res.Count();
             }
 
-            var allVouchers = await voucherService.GetAllVouchers();
-            dashBoard.TotalVouchers = allVouchers.Count();
+            //var allVouchers = await voucherService.GetAllVouchers(role.Name);
+            dashBoard.TotalVouchers = context.Vouchers.Count();
+            dashBoard.TotalPettyCash = context.PettyCashes.Count();
+            dashBoard.TotalRetirementCash = context.RetirementPayments.Count();
+            dashBoard.TotalCashAdvance = context.CashAdvances.Count();
+            var pettyCashOnMyDesk = await pettyCash.GetPendingPettyCashForUser(role.Id, user.Id);
+            var retirementPaymentOnMyDesk = await retirementPayment.GetRetirePaymentsForRole(role.Id, user.Id);
+            var cashAdvanceOnMyDesk = await advancePayment.GetCashAdvanceForRole(role.Id,user.Id);
+            //if (allVouchers == null)
+            //{
+            //    dashBoard.TotalVouchers = 0;
+            //}
+            //else
+            //{
+            //    dashBoard.TotalVouchers = allVouchers.Count();
+            //}
+            //dashBoard.TotalVouchers = allVouchers;
+            if (pettyCashOnMyDesk == null)
+            {
+                dashBoard.PettyCashCount = 0;
+            }
+            else
+            {
+                dashBoard.PettyCashCount = pettyCashOnMyDesk.Count();
+            }
+            if (retirementPaymentOnMyDesk == null)
+            {
+                dashBoard.RejectedCount = 0;
+            }
+            else
+            {
+                dashBoard.RetirementPaymentCount = retirementPaymentOnMyDesk.Count();
+            }
+            if (cashAdvanceOnMyDesk == null)
+            {
+                dashBoard.CashAdvanceCount = 0;
+            }
+            else
+            {
+                dashBoard.CashAdvanceCount = cashAdvanceOnMyDesk.Count();
+            }
+
             return View(dashBoard);
         }
 
         [HttpPost]
         public async Task<IActionResult> SearchByDate(SearchBydateViewModel searchBydateViewModel)
         {
+            var user = await userManager.GetUserAsync(User);
+            var roles = await userManager.GetRolesAsync(user);
+            var role = await roleManager.FindByNameAsync(roles.SingleOrDefault());
+
             if (searchBydateViewModel.MinimumDate > searchBydateViewModel.MaximumDate)
                 throw new ArgumentException("From Date cannot be greater than To Date");
             var searchedVouchers = new List<Voucher>();
-            var newVouchers = await voucherService.GetAllVouchers();
+            var newVouchers = await voucherService.GetAllVouchers(role.Name);
             foreach (var voucher in newVouchers)
             {
                 if (voucher.DateCreated >= searchBydateViewModel.MinimumDate && voucher.DateCreated <= searchBydateViewModel.MaximumDate)
