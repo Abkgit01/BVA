@@ -539,10 +539,8 @@ namespace VoucherAutomationSystem.Controllers
                     }
                 }
 
-                if (await userManager.IsInRoleAsync(user, "AccountOfficer"))
-                {
-                    return View("ViewPettyCash", new CompletePettyCashViewModel { PettyCash = pettyCash, pettyCashActions = ActionList.OrderBy(x => x.DateUpdated).ToList(), NumberInWords = numberInWords, pettyCashFiles = pettyCashFiles });
-                }
+                return View("ViewPettyCash", new CompletePettyCashViewModel { PettyCash = pettyCash, pettyCashActions = ActionList.OrderBy(x => x.DateUpdated).ToList(), NumberInWords = numberInWords, pettyCashFiles = pettyCashFiles });
+
             }
 
             return View();
